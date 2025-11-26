@@ -12,6 +12,9 @@ interface GaleriaTabProps {
   onUpdateItem: (id: string, field: string, value: string) => void;
   onDeleteItem: (id: string) => Promise<boolean>;
   onRefresh: () => void;
+  // Dialog functions
+  promptUrl: (title: string) => Promise<string | null>;
+  confirmDelete: (itemName: string) => Promise<boolean>;
 }
 
 export function GaleriaTab({
@@ -21,18 +24,21 @@ export function GaleriaTab({
   onToggleHome,
   onUpdateItem,
   onDeleteItem,
-  onRefresh
+  onRefresh,
+  promptUrl,
+  confirmDelete
 }: GaleriaTabProps) {
   const handleAddItem = async () => {
-    const url = prompt('URL de la imagen:');
+    const url = await promptUrl('Nueva imagen');
     if (url) {
       await onAddItem(url);
     }
   };
 
-  const handleDeleteItem = async (id: string) => {
-    if (confirm('Eliminar esta imagen?')) {
-      await onDeleteItem(id);
+  const handleDeleteItem = async (item: SitioGaleria) => {
+    const confirmed = await confirmDelete(item.titulo || 'esta imagen');
+    if (confirmed) {
+      await onDeleteItem(item.id);
     }
   };
 
@@ -90,7 +96,7 @@ export function GaleriaTab({
                 {img.es_home ? 'Visible en Home' : 'Mostrar en Home'}
               </button>
               <button
-                onClick={() => handleDeleteItem(img.id)}
+                onClick={() => handleDeleteItem(img)}
                 className="text-red-400 hover:text-red-600 p-1 cursor-pointer"
               >
                 <Trash2 className="w-4 h-4" />

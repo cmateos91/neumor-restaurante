@@ -8,9 +8,8 @@ import {
   useSitioData,
   useIframeCommunication,
   useAdminUI,
-  Tab,
-  tabs,
-  elementToNavigation
+  useDialogs,
+  tabs
 } from './hooks';
 
 // Components
@@ -19,6 +18,8 @@ import {
   DevicePreview,
   SaveModal,
   MessageToast,
+  ConfirmDialog,
+  InputDialog,
   RestauranteTab,
   MenuTab,
   GaleriaTab,
@@ -43,7 +44,6 @@ export default function AdminEditor() {
     features,
     formRestaurante,
     loading,
-    loadAllData,
     setFormRestaurante,
     saveRestaurante,
     addCategoria,
@@ -85,6 +85,17 @@ export default function AdminEditor() {
     navigateToInput
   } = useAdminUI();
 
+  // Hook de dialogs
+  const {
+    confirmState,
+    confirmDelete,
+    closeConfirm,
+    inputState,
+    promptText,
+    promptUrl,
+    closeInput
+  } = useDialogs();
+
   // Hook de comunicacion con iframe
   const {
     iframeRef,
@@ -100,7 +111,7 @@ export default function AdminEditor() {
     sendPageBuilderCommand
   } = useIframeCommunication({
     eventHandlers: {
-      onElementClick: (elementId, nav) => {
+      onElementClick: (_elementId, nav) => {
         navigateToInput(nav.tab, nav.page, nav.inputName);
       },
       onLayoutChanged: (sections) => {
@@ -255,6 +266,8 @@ export default function AdminEditor() {
                   onUpdateMenuItem={updateMenuItem}
                   onDeleteMenuItem={deleteMenuItem}
                   onRefresh={refreshIframe}
+                  promptText={promptText}
+                  confirmDelete={confirmDelete}
                 />
               )}
 
@@ -267,6 +280,8 @@ export default function AdminEditor() {
                   onUpdateItem={updateGaleriaItem}
                   onDeleteItem={deleteGaleriaItem}
                   onRefresh={refreshIframe}
+                  promptUrl={promptUrl}
+                  confirmDelete={confirmDelete}
                 />
               )}
 
@@ -278,6 +293,7 @@ export default function AdminEditor() {
                   onUpdateFeature={updateFeature}
                   onDeleteFeature={deleteFeature}
                   onRefresh={refreshIframe}
+                  confirmDelete={confirmDelete}
                 />
               )}
             </div>
@@ -299,6 +315,33 @@ export default function AdminEditor() {
         onConfirm={handlePublish}
         saving={saving}
       />
+
+      {/* Confirm Dialog */}
+      <ConfirmDialog
+        isOpen={confirmState.isOpen}
+        onClose={closeConfirm}
+        onConfirm={confirmState.onConfirm}
+        title={confirmState.title}
+        message={confirmState.message}
+        confirmText={confirmState.confirmText}
+        cancelText={confirmState.cancelText}
+        variant={confirmState.variant}
+      />
+
+      {/* Input Dialog */}
+      <InputDialog
+        isOpen={inputState.isOpen}
+        onClose={closeInput}
+        onConfirm={inputState.onConfirm}
+        title={inputState.title}
+        message={inputState.message}
+        placeholder={inputState.placeholder}
+        defaultValue={inputState.defaultValue}
+        confirmText={inputState.confirmText}
+        cancelText={inputState.cancelText}
+        inputType={inputState.inputType}
+        required={inputState.required}
+      />
     </div>
   );
 }
@@ -319,7 +362,7 @@ function PageBuilderPanel({ pageLayout, selectedSection, onToggleVisibility }: P
         <span className="text-xs bg-[#d4af37]/10 text-[#d4af37] px-2 py-0.5 rounded-full ml-auto">Beta</span>
       </div>
       <p className="text-xs text-gray-500 mb-4">
-        Haz clic en una seccion del preview y arrastrala para reordenar. Mantén pulsado para activar el modo arrastre.
+        Haz clic en una seccion del preview y arrastrala para reordenar.
       </p>
       <div className="space-y-2">
         {pageLayout.sort((a, b) => a.order - b.order).map((section, index) => (

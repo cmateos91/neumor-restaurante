@@ -13,6 +13,9 @@ interface MenuTabProps {
   onUpdateMenuItem: (id: string, field: string, value: string | number | boolean) => void;
   onDeleteMenuItem: (id: string) => Promise<boolean>;
   onRefresh: () => void;
+  // Dialog functions
+  promptText: (title: string, placeholder?: string) => Promise<string | null>;
+  confirmDelete: (itemName: string) => Promise<boolean>;
 }
 
 export function MenuTab({
@@ -23,18 +26,21 @@ export function MenuTab({
   onAddMenuItem,
   onUpdateMenuItem,
   onDeleteMenuItem,
-  onRefresh
+  onRefresh,
+  promptText,
+  confirmDelete
 }: MenuTabProps) {
   const handleAddCategoria = async () => {
-    const nombre = prompt('Nombre de la categoria:');
+    const nombre = await promptText('Nueva categoria', 'Nombre de la categoria');
     if (nombre) {
       await onAddCategoria(nombre);
     }
   };
 
-  const handleDeleteMenuItem = async (id: string) => {
-    if (confirm('Eliminar este plato?')) {
-      await onDeleteMenuItem(id);
+  const handleDeleteMenuItem = async (item: RestauranteMenuItem) => {
+    const confirmed = await confirmDelete(item.nombre);
+    if (confirmed) {
+      await onDeleteMenuItem(item.id);
     }
   };
 
@@ -88,7 +94,7 @@ export function MenuTab({
                     {item.disponible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                   </button>
                   <button
-                    onClick={() => handleDeleteMenuItem(item.id)}
+                    onClick={() => handleDeleteMenuItem(item)}
                     className="text-red-400 hover:text-red-600 cursor-pointer"
                   >
                     <Trash2 className="w-4 h-4" />

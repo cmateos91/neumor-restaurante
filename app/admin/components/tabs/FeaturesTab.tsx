@@ -37,6 +37,8 @@ interface FeaturesTabProps {
   onUpdateFeature: (id: string, field: string, value: string) => void;
   onDeleteFeature: (id: string) => Promise<boolean>;
   onRefresh: () => void;
+  // Dialog function
+  confirmDelete: (itemName: string) => Promise<boolean>;
 }
 
 export function FeaturesTab({
@@ -45,11 +47,13 @@ export function FeaturesTab({
   onAddFeature,
   onUpdateFeature,
   onDeleteFeature,
-  onRefresh
+  onRefresh,
+  confirmDelete
 }: FeaturesTabProps) {
-  const handleDeleteFeature = async (id: string) => {
-    if (confirm('Eliminar esta caracteristica?')) {
-      await onDeleteFeature(id);
+  const handleDeleteFeature = async (feature: SitioFeature) => {
+    const confirmed = await confirmDelete(feature.titulo);
+    if (confirmed) {
+      await onDeleteFeature(feature.id);
     }
   };
 
@@ -86,7 +90,7 @@ export function FeaturesTab({
                 placeholder="Titulo"
               />
               <button
-                onClick={() => handleDeleteFeature(feat.id)}
+                onClick={() => handleDeleteFeature(feat)}
                 className="text-red-400 hover:text-red-600 cursor-pointer"
               >
                 <Trash2 className="w-4 h-4" />

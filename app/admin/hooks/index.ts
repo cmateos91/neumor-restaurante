@@ -13,3 +13,4 @@ export {
   type UseIframeCommunicationOptions
 } from './useIframeCommunication';
 export * from './useAdminUI';
+export * from './useDialog';

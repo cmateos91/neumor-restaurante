@@ -41,6 +41,12 @@ function RestaurantLayoutContent({ children }: { children: React.ReactNode }) {
     }
   }, [pathname]);
 
+  // Actualizar titulo de la pagina dinamicamente
+  const nombre = config?.nombre || 'Mi Restaurante';
+  useEffect(() => {
+    document.title = nombre;
+  }, [nombre]);
+
   const navItems = [
     { name: 'Inicio', path: '/' },
     { name: 'Menu', path: '/menu' },
@@ -68,7 +74,6 @@ function RestaurantLayoutContent({ children }: { children: React.ReactNode }) {
     );
   }
 
-  const nombre = config?.nombre || 'Mi Restaurante';
   const descripcion = config?.descripcion || '';
   const horario_semana = config?.horario_semana || '';
   const horario_finde = config?.horario_finde || '';
@@ -76,8 +81,13 @@ function RestaurantLayoutContent({ children }: { children: React.ReactNode }) {
   const email = config?.email || '';
 
   return (
-    <div className="min-h-screen bg-[#e6e6e6]">
-      {/* Navigation */}
+    <>
+      {/* DNS Prefetch para carga rapida de imagenes */}
+      <link rel="dns-prefetch" href="https://saynqnmpxerpfgfdpsbx.supabase.co" />
+      <link rel="preconnect" href="https://saynqnmpxerpfgfdpsbx.supabase.co" />
+
+      <div className="min-h-screen bg-[#e6e6e6]">
+        {/* Navigation */}
       <nav className="sticky top-0 z-50 bg-[#e6e6e6] px-4 py-4">
         <div className="max-w-7xl mx-auto">
           <div className="neuro-flat rounded-3xl px-6 py-4">
@@ -180,7 +190,8 @@ function RestaurantLayoutContent({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       </footer>
-    </div>
+      </div>
+    </>
   );
 }
 

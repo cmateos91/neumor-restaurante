@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import Image from 'next/image';
 
 interface MenuCardProps {
@@ -12,7 +12,7 @@ interface MenuCardProps {
   };
 }
 
-export default function MenuCard({ item }: MenuCardProps) {
+const MenuCard = memo(function MenuCard({ item }: MenuCardProps) {
   return (
     <div className="neuro-flat rounded-3xl p-6 neuro-hover">
       {item.imagen_url && (
@@ -49,4 +49,6 @@ export default function MenuCard({ item }: MenuCardProps) {
       </div>
     </div>
   );
-}
+});
+
+export default MenuCard;

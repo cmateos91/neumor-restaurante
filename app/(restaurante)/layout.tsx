@@ -3,96 +3,27 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Menu, X, UtensilsCrossed } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { Menu, X, UtensilsCrossed, Loader2 } from 'lucide-react';
+import { RestaurantProvider, useRestaurant } from '@/lib/restaurant-context';
 import '@/app/_styles/neumorph-restaurant.css';
 
-interface LayoutData {
-  sitioId: string;
-  nombre: string;
-  descripcion: string;
-  horario_semana: string;
-  horario_finde: string;
-  telefono: string;
-  email: string;
-}
-
-const defaultData: LayoutData = {
-  sitioId: '',
-  nombre: 'Mi Restaurante',
-  descripcion: 'Descripción del restaurante',
-  horario_semana: 'Lunes - Viernes: 12:00 - 23:00',
-  horario_finde: 'Sábado - Domingo: 11:00 - 00:00',
-  telefono: '',
-  email: ''
-};
-
-export default function RestaurantLayout({ children }: { children: React.ReactNode }) {
+// Componente interno que usa el context
+function RestaurantLayoutContent({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
-  const [data, setData] = useState<LayoutData>(defaultData);
+  const { config, loading } = useRestaurant();
 
-  // Cargar datos iniciales de Supabase (nuevo schema)
-  useEffect(() => {
-    async function loadSitioData() {
-      // Primero obtener el sitio activo
-      const { data: sitio } = await supabase
-        .from('sitios')
-        .select('id')
-        .eq('activo', true)
-        .limit(1)
-        .single();
-
-      if (!sitio) return;
-
-      // Luego obtener la configuración
-      const { data: config } = await supabase
-        .from('sitio_config')
-        .select('nombre, descripcion, horario_semana, horario_finde, telefono, email')
-        .eq('sitio_id', sitio.id)
-        .single();
-
-      if (config) {
-        setData({
-          sitioId: sitio.id,
-          nombre: config.nombre || defaultData.nombre,
-          descripcion: config.descripcion || defaultData.descripcion,
-          horario_semana: config.horario_semana || defaultData.horario_semana,
-          horario_finde: config.horario_finde || defaultData.horario_finde,
-          telefono: config.telefono || defaultData.telefono,
-          email: config.email || defaultData.email
-        });
-      }
-    }
-    loadSitioData();
-  }, []);
-
-  // Escuchar mensajes del admin para preview en tiempo real
+  // Escuchar navegacion desde el admin
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       if (event.origin !== window.location.origin) return;
 
-      // Navegación SPA desde el admin
       if (event.data?.type === 'admin:navigate') {
         const targetPath = event.data.data?.path;
         if (targetPath && targetPath !== pathname) {
           router.push(targetPath);
         }
-        return;
-      }
-
-      if (event.data?.type === 'admin:config') {
-        const msg = event.data.data;
-        setData(prev => ({
-          ...prev,
-          nombre: msg.nombre !== undefined ? msg.nombre : prev.nombre,
-          descripcion: msg.descripcion !== undefined ? msg.descripcion : prev.descripcion,
-          horario_semana: msg.horario_semana !== undefined ? msg.horario_semana : prev.horario_semana,
-          horario_finde: msg.horario_finde !== undefined ? msg.horario_finde : prev.horario_finde,
-          telefono: msg.telefono !== undefined ? msg.telefono : prev.telefono,
-          email: msg.email !== undefined ? msg.email : prev.email
-        }));
       }
     };
 
@@ -100,9 +31,8 @@ export default function RestaurantLayout({ children }: { children: React.ReactNo
     return () => window.removeEventListener('message', handleMessage);
   }, [pathname, router]);
 
-  // Notificar al admin cuando cambia la ruta (para sincronizar tabs)
+  // Notificar al admin cuando cambia la ruta
   useEffect(() => {
-    // Solo enviar si estamos en un iframe
     if (window.parent !== window) {
       window.parent.postMessage(
         { type: 'iframe:navigate', data: { path: pathname } },
@@ -121,6 +51,30 @@ export default function RestaurantLayout({ children }: { children: React.ReactNo
 
   const isActive = (path: string) => pathname === path;
 
+  // Loader inicial mientras cargan todos los datos
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#e6e6e6] flex items-center justify-center">
+        <div className="neuro-flat rounded-3xl p-12 flex flex-col items-center gap-6">
+          <div className="neuro-pressed rounded-full p-6">
+            <UtensilsCrossed className="w-12 h-12 text-[#d4af37]" />
+          </div>
+          <div className="flex items-center gap-3">
+            <Loader2 className="w-5 h-5 animate-spin text-[#d4af37]" />
+            <span className="text-[#666666] text-sm">Cargando...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const nombre = config?.nombre || 'Mi Restaurante';
+  const descripcion = config?.descripcion || '';
+  const horario_semana = config?.horario_semana || '';
+  const horario_finde = config?.horario_finde || '';
+  const telefono = config?.telefono || '';
+  const email = config?.email || '';
+
   return (
     <div className="min-h-screen bg-[#e6e6e6]">
       {/* Navigation */}
@@ -134,7 +88,7 @@ export default function RestaurantLayout({ children }: { children: React.ReactNo
                   <UtensilsCrossed className="w-6 h-6 text-[#d4af37]" />
                 </div>
                 <span className="text-xl font-bold text-[#2c2c2c] hidden sm:block transition-all">
-                  {data.nombre}
+                  {nombre}
                 </span>
               </Link>
 
@@ -204,28 +158,37 @@ export default function RestaurantLayout({ children }: { children: React.ReactNo
           <div className="neuro-flat rounded-3xl px-8 py-12">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
               <div>
-                <h3 className="text-lg font-bold text-[#2c2c2c] mb-4 transition-all">{data.nombre}</h3>
-                <p className="text-[#666666] text-sm leading-relaxed transition-all">
-                  {data.descripcion}
+                <h3 className="text-lg font-bold text-[#2c2c2c] mb-4">{nombre}</h3>
+                <p className="text-[#666666] text-sm leading-relaxed">
+                  {descripcion}
                 </p>
               </div>
               <div>
                 <h3 className="text-lg font-bold text-[#2c2c2c] mb-4">Horarios</h3>
-                <p className="text-[#666666] text-sm transition-all">{data.horario_semana}</p>
-                <p className="text-[#666666] text-sm transition-all">{data.horario_finde}</p>
+                <p className="text-[#666666] text-sm">{horario_semana}</p>
+                <p className="text-[#666666] text-sm">{horario_finde}</p>
               </div>
               <div>
                 <h3 className="text-lg font-bold text-[#2c2c2c] mb-4">Contacto</h3>
-                <p className="text-[#666666] text-sm transition-all">Tel: {data.telefono}</p>
-                <p className="text-[#666666] text-sm transition-all">{data.email}</p>
+                <p className="text-[#666666] text-sm">Tel: {telefono}</p>
+                <p className="text-[#666666] text-sm">{email}</p>
               </div>
             </div>
             <div className="mt-8 pt-8 border-t border-[#d1d1d1] text-center">
-              <p className="text-[#666666] text-sm">© {new Date().getFullYear()} {data.nombre}. Todos los derechos reservados.</p>
+              <p className="text-[#666666] text-sm">© {new Date().getFullYear()} {nombre}. Todos los derechos reservados.</p>
             </div>
           </div>
         </div>
       </footer>
     </div>
+  );
+}
+
+// Layout principal con Provider
+export default function RestaurantLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <RestaurantProvider>
+      <RestaurantLayoutContent>{children}</RestaurantLayoutContent>
+    </RestaurantProvider>
   );
 }

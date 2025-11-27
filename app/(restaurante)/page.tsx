@@ -3,111 +3,23 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ChefHat, Award, Clock, MapPin, UtensilsCrossed, Wine, Star, Heart, Users, Leaf, Flame, Coffee, Loader2 } from 'lucide-react';
+import { ChefHat, Award, Clock, MapPin, UtensilsCrossed, Wine, Star, Heart, Users, Leaf, Flame, Coffee } from 'lucide-react';
 import { DndContext, closestCenter, DragEndEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
 import EditableWrapper from './_components/EditableWrapper';
 import EditableSection from './_components/EditableSection';
 import { PageSection, defaultHomeLayout } from '@/lib/page-builder.types';
-import { supabase } from '@/lib/supabase';
-import { defaultTextosInicio, TextosInicio } from '@/lib/database.types';
+import { useRestaurant } from '@/lib/restaurant-context';
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   ChefHat, Award, Clock, MapPin, UtensilsCrossed, Wine, Star, Heart, Users, Leaf, Flame, Coffee
 };
 
-interface HomeData {
-  sitioId: string;
-  config: {
-    nombre: string;
-    tagline: string;
-  };
-  textos: TextosInicio;
-  features: Array<{
-    id: string;
-    titulo: string;
-    descripcion: string;
-    icono: string;
-  }>;
-  homeGallery: Array<{
-    id: string;
-    url: string;
-    titulo: string | null;
-  }>;
-}
-
 export default function Home() {
-  const [data, setData] = useState<HomeData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { config, textos, features, galeriaHome } = useRestaurant();
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
   const [sections, setSections] = useState<PageSection[]>(defaultHomeLayout.sections);
-
-  // Cargar datos iniciales
-  useEffect(() => {
-    async function loadData() {
-      try {
-        // Cargar sitio activo
-        const { data: sitioData } = await supabase
-          .from('sitios')
-          .select('*')
-          .eq('activo', true)
-          .limit(1)
-          .single();
-
-        if (sitioData) {
-          // Cargar todo en paralelo
-          const [configRes, textosRes, featuresRes, galeriaRes] = await Promise.all([
-            supabase.from('sitio_config').select('*').eq('sitio_id', sitioData.id).single(),
-            supabase.from('sitio_textos').select('pagina, textos').eq('sitio_id', sitioData.id),
-            supabase.from('sitio_features').select('*').eq('sitio_id', sitioData.id).order('orden'),
-            supabase.from('sitio_galeria').select('*').eq('sitio_id', sitioData.id).eq('es_home', true).eq('visible', true).order('orden')
-          ]);
-
-          const config = configRes.data;
-          const textosMap: Record<string, Record<string, string>> = {};
-          textosRes.data?.forEach((t: { pagina: string; textos: Record<string, string> }) => {
-            textosMap[t.pagina] = t.textos;
-          });
-          const inicioTextos = textosMap['inicio'] || {};
-
-          setData({
-            sitioId: sitioData.id,
-            config: {
-              nombre: config?.nombre || 'Mi Restaurante',
-              tagline: config?.tagline || 'Bienvenido a nuestra experiencia gastronómica'
-            },
-            textos: {
-              btn_menu: inicioTextos.btn_menu || defaultTextosInicio.btn_menu,
-              btn_reservas: inicioTextos.btn_reservas || defaultTextosInicio.btn_reservas,
-              features_titulo: inicioTextos.features_titulo || defaultTextosInicio.features_titulo,
-              features_subtitulo: inicioTextos.features_subtitulo || defaultTextosInicio.features_subtitulo,
-              galeria_titulo: inicioTextos.galeria_titulo || defaultTextosInicio.galeria_titulo,
-              galeria_subtitulo: inicioTextos.galeria_subtitulo || defaultTextosInicio.galeria_subtitulo,
-              galeria_btn: inicioTextos.galeria_btn || defaultTextosInicio.galeria_btn
-            },
-            features: featuresRes.data?.map(f => ({
-              id: f.id,
-              titulo: f.titulo,
-              descripcion: f.descripcion || '',
-              icono: f.icono
-            })) || [],
-            homeGallery: galeriaRes.data?.map(g => ({
-              id: g.id,
-              url: g.url,
-              titulo: g.titulo
-            })) || []
-          });
-        }
-      } catch (error) {
-        console.error('Error cargando datos:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadData();
-  }, []);
 
   // Configurar sensor con delay para distinguir click de drag
   const sensors = useSensors(
@@ -118,7 +30,7 @@ export default function Home() {
     })
   );
 
-  // Manejar mensajes del admin
+  // Manejar mensajes del admin (solo para page builder)
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       if (event.origin !== window.location.origin) return;
@@ -136,58 +48,8 @@ export default function Home() {
 
       // Actualizar layout desde admin
       if (type === 'pagebuilder:update-layout') {
-        if (msgData.sections) {
+        if (msgData?.sections) {
           setSections(msgData.sections);
-        }
-      }
-
-      // Actualizar desde admin:restaurante (incluye config y textos)
-      if (type === 'admin:restaurante') {
-        setData(prev => prev ? ({
-          ...prev,
-          config: {
-            nombre: msgData.nombre ?? prev.config.nombre,
-            tagline: msgData.tagline ?? prev.config.tagline
-          },
-          textos: {
-            btn_menu: msgData.inicio_btn_menu ?? prev.textos.btn_menu,
-            btn_reservas: msgData.inicio_btn_reservas ?? prev.textos.btn_reservas,
-            features_titulo: msgData.inicio_features_titulo ?? prev.textos.features_titulo,
-            features_subtitulo: msgData.inicio_features_subtitulo ?? prev.textos.features_subtitulo,
-            galeria_titulo: msgData.inicio_galeria_titulo ?? prev.textos.galeria_titulo,
-            galeria_subtitulo: msgData.inicio_galeria_subtitulo ?? prev.textos.galeria_subtitulo,
-            galeria_btn: msgData.inicio_galeria_btn ?? prev.textos.galeria_btn
-          }
-        }) : null);
-      }
-
-      // Actualizar features
-      if (type === 'admin:features') {
-        if (msgData.items) {
-          setData(prev => prev ? ({
-            ...prev,
-            features: msgData.items.map((f: { id: string; titulo: string; descripcion?: string; icono: string }) => ({
-              id: f.id,
-              titulo: f.titulo,
-              descripcion: f.descripcion || '',
-              icono: f.icono
-            }))
-          }) : null);
-        }
-      }
-
-      // Actualizar galería
-      if (type === 'admin:galeria') {
-        if (msgData.items) {
-          const homeItems = msgData.items.filter((g: { es_home: boolean }) => g.es_home);
-          setData(prev => prev ? ({
-            ...prev,
-            homeGallery: homeItems.map((g: { id: string; url: string; titulo?: string }) => ({
-              id: g.id,
-              url: g.url,
-              titulo: g.titulo || null
-            }))
-          }) : null);
         }
       }
     };
@@ -242,24 +104,10 @@ export default function Home() {
     notifySelection(null);
   };
 
-  // Loading state
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-[#d4af37]" />
-      </div>
-    );
-  }
-
-  if (!data) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-500">No se encontró el sitio</p>
-      </div>
-    );
-  }
-
-  const { config, textos, features, homeGallery } = data;
+  // Datos del context
+  const nombre = config?.nombre || 'Mi Restaurante';
+  const tagline = config?.tagline || 'Bienvenido a nuestra experiencia gastronómica';
+  const inicioTextos = textos.inicio;
 
   // Ordenar secciones
   const sortedSections = [...sections].sort((a, b) => a.order - b.order);
@@ -278,25 +126,25 @@ export default function Home() {
                   </div>
 
                   <EditableWrapper elementId="inicio.hero.nombre" as="h1" className="text-5xl md:text-7xl font-bold text-[#2c2c2c] mb-6 tracking-tight transition-all">
-                    {config.nombre}
+                    {nombre}
                   </EditableWrapper>
 
                   <EditableWrapper elementId="inicio.hero.tagline" as="p" className="text-xl md:text-2xl text-[#666666] mb-8 max-w-3xl mx-auto leading-relaxed transition-all">
-                    {config.tagline}
+                    {tagline}
                   </EditableWrapper>
 
                   <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                     <EditableWrapper elementId="inicio.hero.btn_menu">
                       <Link href="/menu" prefetch={true}>
                         <button className="neuro-flat neuro-hover rounded-2xl px-8 py-4 text-[#2c2c2c] font-semibold w-full sm:w-auto transition-all cursor-pointer">
-                          {textos.btn_menu}
+                          {inicioTextos.btn_menu}
                         </button>
                       </Link>
                     </EditableWrapper>
                     <EditableWrapper elementId="inicio.hero.btn_reservas">
                       <Link href="/reservas" prefetch={true}>
                         <button className="neuro-pressed rounded-2xl px-8 py-4 text-[#d4af37] font-semibold w-full sm:w-auto transition-all cursor-pointer">
-                          {textos.btn_reservas}
+                          {inicioTextos.btn_reservas}
                         </button>
                       </Link>
                     </EditableWrapper>
@@ -314,10 +162,10 @@ export default function Home() {
             <div className="max-w-7xl mx-auto">
               <div className="text-center mb-16">
                 <EditableWrapper elementId="inicio.features.titulo" as="h2" className="text-4xl md:text-5xl font-bold text-[#2c2c2c] mb-4 transition-all">
-                  {textos.features_titulo}
+                  {inicioTextos.features_titulo}
                 </EditableWrapper>
                 <EditableWrapper elementId="inicio.features.subtitulo" as="p" className="text-[#666666] text-lg max-w-2xl mx-auto transition-all">
-                  {textos.features_subtitulo}
+                  {inicioTextos.features_subtitulo}
                 </EditableWrapper>
               </div>
 
@@ -350,22 +198,22 @@ export default function Home() {
         );
 
       case 'gallery-preview':
-        if (homeGallery.length === 0) return null;
+        if (galeriaHome.length === 0) return null;
         return (
           <section key={section.id} className="px-4 py-20">
             <div className="max-w-7xl mx-auto">
               <div className="neuro-flat rounded-[3rem] p-8 md:p-16">
                 <div className="text-center mb-12">
                   <EditableWrapper elementId="inicio.galeria.titulo" as="h2" className="text-4xl md:text-5xl font-bold text-[#2c2c2c] mb-4 transition-all">
-                    {textos.galeria_titulo}
+                    {inicioTextos.galeria_titulo}
                   </EditableWrapper>
                   <EditableWrapper elementId="inicio.galeria.subtitulo" as="p" className="text-[#666666] text-lg transition-all">
-                    {textos.galeria_subtitulo}
+                    {inicioTextos.galeria_subtitulo}
                   </EditableWrapper>
                 </div>
 
                 <EditableWrapper elementId="inicio.galeria.items" className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {homeGallery.slice(0, 3).map((image, i) => (
+                  {galeriaHome.slice(0, 3).map((image, i) => (
                     <div
                       key={image.id}
                       className="neuro-pressed rounded-2xl overflow-hidden h-64 neuro-hover relative transition-all"
@@ -385,7 +233,7 @@ export default function Home() {
                   <EditableWrapper elementId="inicio.galeria.btn">
                     <Link href="/galeria">
                       <button className="neuro-flat neuro-hover rounded-2xl px-8 py-4 text-[#2c2c2c] font-semibold transition-all cursor-pointer">
-                        {textos.galeria_btn}
+                        {inicioTextos.galeria_btn}
                       </button>
                     </Link>
                   </EditableWrapper>

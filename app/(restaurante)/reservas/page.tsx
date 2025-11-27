@@ -1,12 +1,14 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Calendar, Clock, Users, Mail, Phone, User, MessageSquare, CheckCircle2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import { defaultTextosReservas, TextosReservas } from '@/lib/database.types';
+import { useRestaurant } from '@/lib/restaurant-context';
 
 export default function Reservas() {
-  const [sitioId, setSitioId] = useState<string | null>(null);
+  const { sitioId, textos } = useRestaurant();
+  const pageTexts = textos.reservas;
+
   const [formData, setFormData] = useState({
     nombre: '',
     email: '',
@@ -19,65 +21,6 @@ export default function Reservas() {
   const [submitted, setSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [pageTexts, setPageTexts] = useState<TextosReservas>(defaultTextosReservas);
-
-  useEffect(() => {
-    async function loadData() {
-      // Obtener sitio activo
-      const { data: sitio } = await supabase
-        .from('sitios')
-        .select('id')
-        .eq('activo', true)
-        .limit(1)
-        .single();
-
-      if (!sitio) return;
-      setSitioId(sitio.id);
-
-      // Cargar textos de la página
-      const { data: textosData } = await supabase
-        .from('sitio_textos')
-        .select('textos')
-        .eq('sitio_id', sitio.id)
-        .eq('pagina', 'reservas')
-        .single();
-
-      if (textosData?.textos) {
-        setPageTexts({
-          titulo: textosData.textos.titulo || defaultTextosReservas.titulo,
-          subtitulo: textosData.textos.subtitulo || defaultTextosReservas.subtitulo,
-          exito_titulo: textosData.textos.exito_titulo || defaultTextosReservas.exito_titulo,
-          exito_mensaje: textosData.textos.exito_mensaje || defaultTextosReservas.exito_mensaje,
-          btn_confirmar: textosData.textos.btn_confirmar || defaultTextosReservas.btn_confirmar,
-          btn_enviando: textosData.textos.btn_enviando || defaultTextosReservas.btn_enviando
-        });
-      }
-    }
-    loadData();
-  }, []);
-
-  // Live preview desde el admin
-  useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      if (event.origin !== window.location.origin) return;
-
-      const { type, data } = event.data || {};
-
-      if (type === 'admin:restaurante') {
-        setPageTexts(prev => ({
-          titulo: data.reservas_titulo ?? prev.titulo,
-          subtitulo: data.reservas_subtitulo ?? prev.subtitulo,
-          exito_titulo: data.reservas_exito_titulo ?? prev.exito_titulo,
-          exito_mensaje: data.reservas_exito_mensaje ?? prev.exito_mensaje,
-          btn_confirmar: data.reservas_btn_confirmar ?? prev.btn_confirmar,
-          btn_enviando: data.reservas_btn_enviando ?? prev.btn_enviando
-        }));
-      }
-    };
-
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,7 +29,7 @@ export default function Reservas() {
 
     try {
       if (sitioId) {
-        // Guardar en sitio_reservas (nuevo schema)
+        // Guardar en sitio_reservas
         const { error: insertError } = await supabase.from('sitio_reservas').insert({
           sitio_id: sitioId,
           nombre: formData.nombre,

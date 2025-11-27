@@ -1,102 +1,15 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Image from 'next/image';
-import { supabase } from '@/lib/supabase';
-import { SitioGaleria, defaultTextosGaleria } from '@/lib/database.types';
-import { Loader2 } from 'lucide-react';
-
-interface PageTexts {
-  titulo: string;
-  subtitulo: string;
-}
+import { useRestaurant } from '@/lib/restaurant-context';
 
 export default function Galeria() {
-  const [gallery, setGallery] = useState<SitioGaleria[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [pageTexts, setPageTexts] = useState<PageTexts>(defaultTextosGaleria);
+  const { textos, galeria } = useRestaurant();
+  const pageTexts = textos.galeria;
 
-  useEffect(() => {
-    async function loadData() {
-      try {
-        const { data: sitio } = await supabase
-          .from('sitios')
-          .select('id')
-          .eq('activo', true)
-          .limit(1)
-          .single();
-
-        if (!sitio) {
-          setLoading(false);
-          return;
-        }
-
-        // Cargar textos y galería en paralelo
-        const [textosRes, galeriaRes] = await Promise.all([
-          supabase
-            .from('sitio_textos')
-            .select('textos')
-            .eq('sitio_id', sitio.id)
-            .eq('pagina', 'galeria')
-            .single(),
-          supabase
-            .from('sitio_galeria')
-            .select('*')
-            .eq('sitio_id', sitio.id)
-            .eq('visible', true)
-            .order('orden')
-        ]);
-
-        if (textosRes.data?.textos) {
-          setPageTexts({
-            titulo: textosRes.data.textos.titulo || defaultTextosGaleria.titulo,
-            subtitulo: textosRes.data.textos.subtitulo || defaultTextosGaleria.subtitulo
-          });
-        }
-
-        setGallery(galeriaRes.data || []);
-      } catch (error) {
-        console.error('Error cargando galería:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadData();
-  }, []);
-
-  // Live preview desde el admin
-  useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      if (event.origin !== window.location.origin) return;
-
-      const { type, data } = event.data || {};
-
-      if (type === 'admin:restaurante') {
-        setPageTexts(prev => ({
-          titulo: data.galeria_titulo ?? prev.titulo,
-          subtitulo: data.galeria_subtitulo ?? prev.subtitulo
-        }));
-      }
-
-      if (type === 'admin:galeria') {
-        if (data.items) {
-          setGallery(data.items);
-        }
-      }
-    };
-
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-[#d4af37]" />
-      </div>
-    );
-  }
+  // Filtrar solo las visibles (ya vienen filtradas del context, pero por si acaso)
+  const visibleGallery = galeria.filter(g => g.visible !== false);
 
   return (
     <div className="min-h-screen px-4 py-12 page-transition">
@@ -112,7 +25,7 @@ export default function Galeria() {
         </div>
 
         {/* Gallery Grid */}
-        {gallery.length === 0 ? (
+        {visibleGallery.length === 0 ? (
           <div className="neuro-flat rounded-3xl p-12 text-center">
             <p className="text-[#666666] text-lg">
               No hay imagenes en la galeria todavia.
@@ -120,7 +33,7 @@ export default function Galeria() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {gallery.map((image) => (
+            {visibleGallery.map((image) => (
               <div
                 key={image.id}
                 className="neuro-flat rounded-3xl p-4 neuro-hover group"

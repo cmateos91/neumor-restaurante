@@ -1,113 +1,14 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import MenuCard from '../Components/MenuCard';
-import { supabase } from '@/lib/supabase';
-import { RestauranteMenuCategoria, RestauranteMenuItem, defaultTextosMenu } from '@/lib/database.types';
-import { Loader2 } from 'lucide-react';
-
-interface PageTexts {
-  titulo: string;
-  subtitulo: string;
-  filtro_todos: string;
-  sin_items: string;
-}
+import { useRestaurant } from '@/lib/restaurant-context';
 
 export default function Menu() {
-  const [selectedCategory, setSelectedCategory] = useState('Todos');
-  const [categorias, setCategorias] = useState<RestauranteMenuCategoria[]>([]);
-  const [menuItems, setMenuItems] = useState<RestauranteMenuItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [pageTexts, setPageTexts] = useState<PageTexts>(defaultTextosMenu);
+  const { textos, categorias, menuItems } = useRestaurant();
+  const pageTexts = textos.menu;
 
-  useEffect(() => {
-    async function loadMenu() {
-      try {
-        // Obtener sitio activo
-        const { data: sitio } = await supabase
-          .from('sitios')
-          .select('id')
-          .eq('activo', true)
-          .limit(1)
-          .single();
-
-        if (!sitio) {
-          setLoading(false);
-          return;
-        }
-
-        // Cargar textos de la página
-        const { data: textosData } = await supabase
-          .from('sitio_textos')
-          .select('textos')
-          .eq('sitio_id', sitio.id)
-          .eq('pagina', 'menu')
-          .single();
-
-        if (textosData?.textos) {
-          setPageTexts({
-            titulo: textosData.textos.titulo || defaultTextosMenu.titulo,
-            subtitulo: textosData.textos.subtitulo || defaultTextosMenu.subtitulo,
-            filtro_todos: textosData.textos.filtro_todos || defaultTextosMenu.filtro_todos,
-            sin_items: textosData.textos.sin_items || defaultTextosMenu.sin_items
-          });
-          setSelectedCategory(textosData.textos.filtro_todos || defaultTextosMenu.filtro_todos);
-        }
-
-        // Cargar categorías y items en paralelo
-        const [catRes, itemsRes] = await Promise.all([
-          supabase
-            .from('sitio_menu_categorias')
-            .select('*')
-            .eq('sitio_id', sitio.id)
-            .order('orden'),
-          supabase
-            .from('sitio_menu_items')
-            .select('*')
-            .eq('sitio_id', sitio.id)
-            .eq('disponible', true)
-            .order('orden')
-        ]);
-
-        setCategorias(catRes.data || []);
-        setMenuItems(itemsRes.data || []);
-      } catch (error) {
-        console.error('Error cargando menú:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadMenu();
-  }, []);
-
-  // Live preview desde el admin
-  useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      if (event.origin !== window.location.origin) return;
-
-      const { type, data } = event.data || {};
-
-      // Actualizar textos desde admin:restaurante
-      if (type === 'admin:restaurante') {
-        setPageTexts(prev => ({
-          titulo: data.menu_titulo ?? prev.titulo,
-          subtitulo: data.menu_subtitulo ?? prev.subtitulo,
-          filtro_todos: data.menu_filtro_todos ?? prev.filtro_todos,
-          sin_items: data.menu_sin_items ?? prev.sin_items
-        }));
-      }
-
-      // Actualizar menú desde admin:menu
-      if (type === 'admin:menu') {
-        if (data.categorias) setCategorias(data.categorias);
-        if (data.items) setMenuItems(data.items.filter((i: RestauranteMenuItem) => i.disponible));
-      }
-    };
-
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
-  }, []);
+  const [selectedCategory, setSelectedCategory] = useState(pageTexts.filtro_todos);
 
   // Lista de categorías para el filtro
   const categoryNames = [pageTexts.filtro_todos, ...categorias.map(c => c.nombre)];
@@ -126,14 +27,6 @@ export default function Menu() {
   const filteredItems = selectedCategory === pageTexts.filtro_todos
     ? allItems
     : allItems.filter(item => item.categoria === selectedCategory);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-[#d4af37]" />
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen px-4 py-12 page-transition">

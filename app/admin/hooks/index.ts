@@ -16,3 +16,4 @@ export * from './useAdminUI';
 export * from './useDialog';
 export * from './usePendingFiles';
 export * from './usePendingDeletes';
+export * from './useDashboardData';

@@ -1,0 +1,12 @@
+export { DashboardView } from './DashboardView';
+export { DashboardContainer } from './DashboardContainer';
+export { DashboardHeader } from './DashboardHeader';
+export type { DashboardTab } from './DashboardHeader';
+export { StatsCards } from './StatsCards';
+export type { StatData } from './StatsCards';
+export { OnboardingChecklist } from './OnboardingChecklist';
+export type { ChecklistItem } from './OnboardingChecklist';
+export { ActivityFeed } from './ActivityFeed';
+export type { ActivityItem } from './ActivityFeed';
+export { LeadsTable } from './LeadsTable';
+export type { Lead } from './LeadsTable';

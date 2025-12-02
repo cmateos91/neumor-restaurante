@@ -7,3 +7,4 @@ export * from './Modal';
 export * from './ConfirmDialog';
 export * from './InputDialog';
 export * from './ImageUploader';
+export * from './ViewSwitcher';

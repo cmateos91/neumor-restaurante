@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Store, UtensilsCrossed, Image, Sparkles, Loader2, GripVertical, Eye, EyeOff, Layers } from 'lucide-react';
 
 // Hooks
@@ -27,8 +27,12 @@ import {
   RestauranteTab,
   MenuTab,
   GaleriaTab,
-  FeaturesTab
+  FeaturesTab,
+  DashboardContainer
 } from './components';
+
+// Types
+import type { AdminView } from './components';
 
 // Iconos para los tabs
 const tabIcons = {
@@ -39,6 +43,9 @@ const tabIcons = {
 };
 
 export default function AdminEditor() {
+  // Estado para la vista actual (editor o dashboard)
+  const [currentView, setCurrentView] = useState<AdminView>('editor');
+
   // Hook de datos
   const {
     sitio,
@@ -313,15 +320,22 @@ export default function AdminEditor() {
         onPageBuilderToggle={togglePageBuilderMode}
         onRefresh={refreshIframe}
         onPublish={() => setShowSaveModal(true)}
+        currentView={currentView}
+        onViewChange={setCurrentView}
       />
 
       {/* Message Toast */}
       <MessageToast message={message} />
 
-      {/* Main Content */}
-      <div className="flex-1 flex gap-4 min-h-0">
-        {/* Left Panel - Editor */}
-        <div className="w-96 flex flex-col gap-4">
+      {/* Main Content - Renderizado condicional segun vista */}
+      {currentView === 'dashboard' ? (
+        /* Dashboard View - Conectado con Supabase */
+        <DashboardContainer sitioId={sitio?.id} />
+      ) : (
+        /* Editor View */
+        <div className="flex-1 flex gap-4 min-h-0">
+          {/* Left Panel - Editor */}
+          <div className="w-96 flex flex-col gap-4">
           {/* Page Builder Panel */}
           {pageBuilderMode && (
             <PageBuilderPanel
@@ -421,13 +435,14 @@ export default function AdminEditor() {
           )}
         </div>
 
-        {/* Right Panel - Preview */}
-        <DevicePreview
-          ref={iframeRef}
-          device={device}
-          currentPage={currentPage}
-        />
-      </div>
+          {/* Right Panel - Preview */}
+          <DevicePreview
+            ref={iframeRef}
+            device={device}
+            currentPage={currentPage}
+          />
+        </div>
+      )}
 
       {/* Save Modal */}
       <SaveModal

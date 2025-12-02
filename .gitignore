@@ -39,3 +39,13 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# supabase
+/supabase/migrations/*_seed*.sql
+/supabase/.temp/
+
+# database schema dumps
+/database/
+
+# docs con configuracion especifica
+/docs/n8n-setup.md

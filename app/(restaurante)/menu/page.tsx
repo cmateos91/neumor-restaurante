@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import MenuCard from '../Components/MenuCard';
+import MenuCard from '../_components/MenuCard';
 import { useRestaurant } from '@/lib/restaurant-context';
 
 export default function Menu() {

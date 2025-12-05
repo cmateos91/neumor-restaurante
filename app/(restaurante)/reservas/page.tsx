@@ -30,7 +30,7 @@ export default function Reservas() {
     try {
       if (sitioId) {
         // Guardar en sitio_reservas
-        const { error: insertError } = await supabase.from('sitio_reservas').insert({
+        const { data: reserva, error: insertError } = await supabase.from('sitio_reservas').insert({
           sitio_id: sitioId,
           nombre: formData.nombre,
           email: formData.email,
@@ -40,9 +40,18 @@ export default function Reservas() {
           personas: formData.personas,
           notas: formData.notas || null,
           estado: 'pendiente'
-        });
+        }).select('id').single();
 
         if (insertError) throw insertError;
+
+        // Enviar alerta al restaurante (no bloqueante)
+        if (reserva?.id) {
+          fetch('/api/reservas/email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reservaId: reserva.id, tipo: 'nueva' })
+          }).catch(console.error);
+        }
       }
 
       setSubmitted(true);

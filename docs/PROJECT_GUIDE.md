@@ -4,7 +4,7 @@ Este documento sirve como guía maestra para el desarrollo, mantenimiento y evol
 
 ## 1. Visión General del Proyecto
 
-**NeumorStudio** es una plataforma web construida con **Next.js 14**, **Tailwind CSS** y **Supabase**. Su principal diferenciador es su diseño **Neumórfico (Soft UI)**, que ofrece una experiencia de usuario táctil, moderna y minimalista.
+**NeumorStudio** es una plataforma web construida con **Next.js 16**, **React 19**, **Tailwind CSS 4** y **Supabase**. Su principal diferenciador es su diseño **Neumórfico (Soft UI)**, que ofrece una experiencia de usuario táctil, moderna y minimalista.
 
 El objetivo es ofrecer a los clientes (restaurantes) una presencia web impactante que no solo muestre su menú y local, sino que también gestione reservas y contacto de manera eficiente.
 
@@ -50,33 +50,79 @@ Un potente editor visual que permite modificar la web en tiempo real.
     *   Soporte para modo claro/oscuro en el editor.
     *   Vista previa en diferentes dispositivos (Móvil, Tablet, Desktop).
     *   *Estado*: ✅ Implementado y funcional con Supabase.
+*   **Dashboard**:
+    *   Estadísticas de leads, mensajes y actividad.
+    *   Feed de actividad en tiempo real.
+    *   *Estado*: ✅ Implementado.
+*   **Gestión de Leads**:
+    *   CRUD completo de leads (crear, ver, actualizar, eliminar).
+    *   Filtrado por estado, fuente y prioridad.
+    *   API REST para integración externa.
+    *   *Estado*: ✅ Implementado.
+*   **Integraciones (n8n)**:
+    *   Webhooks para recibir leads desde Instagram, WhatsApp, Facebook, etc.
+    *   Logging de webhooks para debugging.
+    *   *Estado*: ✅ Implementado.
 
 ---
 
 ## 3. Arquitectura Técnica
 
-*   **Frontend**: Next.js 14 (App Router), React, TypeScript.
-*   **Estilos**: Tailwind CSS + Variables CSS personalizadas para efectos neumórficos (`neumorph-restaurant.css`).
-*   **Base de Datos**: Supabase (PostgreSQL) para persistencia de datos del restaurante, menú y configuraciones.
+### Stack Principal
+*   **Frontend**: Next.js 16 (App Router), React 19, TypeScript.
+*   **Estilos**: Tailwind CSS 4 + Variables CSS personalizadas para efectos neumórficos (`neumorph-restaurant.css`).
+*   **Base de Datos**: Supabase (PostgreSQL) para persistencia de datos.
 *   **Iconos**: Lucide React.
+*   **Drag & Drop**: dnd-kit.
+*   **Integraciones**: n8n via webhooks.
+
+### Estructura de Carpetas
+```
+app/
+├── (restaurante)/        # Sitio público (grupo de rutas)
+│   ├── _components/      # Componentes editables en vivo
+│   ├── _hooks/           # useLivePreview.ts
+│   └── [pages]/          # home, menu, galeria, reservas, contacto
+├── admin/                # Panel de administración
+│   ├── hooks/            # useSitioData, useAdminUI, useDashboardData...
+│   ├── components/       # ui/, tabs/, dashboard/
+│   └── page.tsx          # Editor principal
+├── api/                  # API Routes
+│   ├── leads/            # CRUD de leads
+│   ├── dashboard/        # stats, activities
+│   └── webhooks/n8n/     # Integración n8n
+└── _styles/              # globals.css, neumorph-restaurant.css
+```
+
+### Tablas Supabase
+`sitios`, `sitio_config`, `sitio_textos`, `sitio_menu_categorias`, `sitio_menu_items`, `sitio_galeria`, `sitio_features`, `sitio_reservas`, `leads`, `activities`, `integrations`, `automations`, `webhook_logs`
 
 ---
 
 ## 4. Hoja de Ruta (Roadmap) y Tareas Pendientes
 
-Esta sección divide el trabajo restante en puntos claros para crear ramas de desarrollo (`git branch`).
+Esta sección divide el trabajo en fases claras.
 
-### Fase 1: Funcionalidad Core y Backend <!-- id: roadmap-1 -->
-*   [ ] **Gestión de Reservas (Backend)**
-    *   Crear tabla `reservas` en Supabase.
-    *   Conectar el formulario de reservas para guardar datos reales.
-    *   Panel en Admin para ver/aceptar/rechazar reservas.
-*   [ ] **Sistema de Notificaciones**
-    *   Integrar servicio de email (ej. Resend o SendGrid).
-    *   Enviar email de confirmación al cliente al reservar.
-    *   Enviar alerta al restaurante cuando llega una nueva reserva.
+### Fase 0: Infraestructura Base (COMPLETADA)
+*   [x] **Editor Visual WYSIWYG** - Edición en tiempo real via iframe
+*   [x] **Sistema de Leads** - CRUD completo con API REST
+*   [x] **Dashboard** - Estadísticas y feed de actividad
+*   [x] **Integraciones n8n** - Webhooks para Instagram, WhatsApp, Facebook, etc.
+*   [x] **Gestión de Menú** - Categorías, items, precios, imágenes
+*   [x] **Galería** - Subida de imágenes, visibilidad, orden
 
-### Fase 2: Expansión de Servicios <!-- id: roadmap-2 -->
+### Fase 1: Funcionalidad Core y Backend (COMPLETADA)
+*   [x] **Gestión de Reservas (Backend)**
+    *   Tabla `sitio_reservas` integrada con formulario público.
+    *   Panel en Admin (`/admin/reservas`) para ver/confirmar/cancelar reservas.
+    *   Estados: pendiente, confirmada, cancelada, completada.
+*   [x] **Sistema de Notificaciones**
+    *   Integración con Resend (`lib/email.ts`).
+    *   API endpoint `/api/reservas/email` para envío de emails.
+    *   Email de confirmación/cancelación al cliente.
+    *   Alerta al restaurante en nuevas reservas.
+
+### Fase 2: Expansión de Servicios
 *   [ ] **Módulo de Blog / Novedades**
     *   Crear sistema de posts para eventos o noticias del restaurante.
     *   Añadir sección "Blog" en el frontend.
@@ -85,7 +131,7 @@ Esta sección divide el trabajo restante en puntos claros para crear ramas de de
     *   Integrar Stripe para depósitos de reserva o pedidos online (Takeaway).
     *   Carrito de compras simple para pedidos.
 
-### Fase 3: Optimización y SEO <!-- id: roadmap-3 -->
+### Fase 3: Optimización y SEO
 *   [ ] **SEO Técnico**
     *   Implementar metadatos dinámicos (Open Graph, Twitter Cards) basados en la config del restaurante.
     *   Generación de Sitemap.xml y Robots.txt.
@@ -93,9 +139,9 @@ Esta sección divide el trabajo restante en puntos claros para crear ramas de de
     *   Optimización de imágenes (Next/Image) con carga diferida (lazy loading) agresiva en galería.
     *   Mejora de Core Web Vitals.
 
-### Fase 4: Personalización Avanzada <!-- id: roadmap-4 -->
+### Fase 4: Personalización Avanzada
 *   [ ] **Temas y Colores**
-    *   Permitir al admin elegir la paleta de colores principal (actualmente hardcoded o semi-dinámica).
+    *   Permitir al admin elegir la paleta de colores principal.
     *   Selector de tipografías.
 
 ---

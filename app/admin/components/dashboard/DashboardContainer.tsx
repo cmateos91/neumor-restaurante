@@ -8,6 +8,7 @@ import { StatsCards } from './StatsCards';
 import { OnboardingChecklist } from './OnboardingChecklist';
 import { ActivityFeed } from './ActivityFeed';
 import { LeadsTable } from './LeadsTable';
+import { AutomatedMessagesManager } from '../automations';
 import type { StatData } from './StatsCards';
 import type { ActivityItem } from './ActivityFeed';
 import type { Lead as UILead } from './LeadsTable';
@@ -217,6 +218,11 @@ export function DashboardContainer({ sitioId }: DashboardContainerProps) {
             <h3 className="text-lg font-semibold text-gray-700 mb-2">Reservas</h3>
             <p className="text-gray-500">Proximamente: Sistema de reservas integrado...</p>
           </div>
+        );
+
+      case 'automations':
+        return (
+          <AutomatedMessagesManager sitioId={sitioId || null} />
         );
 
       case 'settings':

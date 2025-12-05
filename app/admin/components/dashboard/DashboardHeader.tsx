@@ -8,10 +8,11 @@ import {
   Star,
   Calendar,
   Settings,
-  RefreshCw
+  RefreshCw,
+  Zap
 } from 'lucide-react';
 
-export type DashboardTab = 'overview' | 'leads' | 'messages' | 'reviews' | 'reservations' | 'settings';
+export type DashboardTab = 'overview' | 'leads' | 'messages' | 'reviews' | 'reservations' | 'automations' | 'settings';
 
 interface TabConfig {
   id: DashboardTab;
@@ -26,6 +27,7 @@ const tabs: TabConfig[] = [
   { id: 'messages', label: 'Mensajes', icon: MessageCircle },
   { id: 'reviews', label: 'Resenas', icon: Star },
   { id: 'reservations', label: 'Reservas', icon: Calendar },
+  { id: 'automations', label: 'Automatizaciones', icon: Zap },
 ];
 
 interface DashboardHeaderProps {

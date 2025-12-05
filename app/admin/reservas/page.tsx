@@ -46,6 +46,17 @@ export default function AdminReservas() {
   const updateEstado = async (id: string, estado: EstadoReserva) => {
     try {
       await supabase.from('sitio_reservas').update({ estado }).eq('id', id);
+
+      // Enviar email según el nuevo estado
+      if (estado === 'confirmada' || estado === 'cancelada') {
+        const tipo = estado === 'confirmada' ? 'confirmacion' : 'cancelacion';
+        fetch('/api/reservas/email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reservaId: id, tipo })
+        }).catch(console.error);
+      }
+
       loadData();
     } catch (error) {
       console.error('Error actualizando estado:', error);

@@ -247,3 +247,125 @@ export interface DashboardStats {
     comparison_percent: Record<string, number>;
   };
 }
+
+// ===== MENSAJES AUTOMATIZADOS =====
+export type MessageTrigger =
+  | 'lead_created'           // Nuevo lead recibido
+  | 'message_received'       // Mensaje entrante del cliente
+  | 'reservation_created'    // Nueva reserva
+  | 'reservation_confirmed'  // Reserva confirmada
+  | 'follow_up';             // Seguimiento programado
+
+export type MessageChannel =
+  | 'whatsapp'
+  | 'instagram_dm'
+  | 'facebook_messenger'
+  | 'email'
+  | 'sms'
+  | 'telegram';
+
+export type MessageSendStatus =
+  | 'pending'
+  | 'queued'
+  | 'sent'
+  | 'delivered'
+  | 'read'
+  | 'failed';
+
+export interface AutomatedMessage {
+  id: string;
+  sitio_id: string;
+
+  // Identificacion
+  name: string;
+  description?: string;
+
+  // Configuracion
+  trigger: MessageTrigger;
+  channel: MessageChannel;
+  message_template: string;
+
+  enabled: boolean;
+  delay_seconds: number;
+
+  // Horario (opcional)
+  schedule_start?: string;  // HH:MM
+  schedule_end?: string;    // HH:MM
+  schedule_days?: number[]; // 0-6 (Dom-Sab)
+
+  // Condiciones adicionales
+  conditions?: {
+    source?: LeadSource[];           // Solo para estos origenes
+    min_delay_between?: number;      // Segundos minimos entre envios al mismo destino
+    [key: string]: unknown;
+  };
+
+  // Estadisticas
+  times_sent: number;
+  last_sent_at?: string;
+
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AutomatedMessageLog {
+  id: string;
+  message_id: string;
+  sitio_id: string;
+  lead_id?: string;
+
+  // Destino
+  recipient_identifier: string;  // Email, telefono, username
+  channel: MessageChannel;
+
+  // Contenido
+  rendered_message: string;
+
+  // Estado
+  status: MessageSendStatus;
+
+  // Respuesta del proveedor
+  external_id?: string;
+  provider_response?: Record<string, unknown>;
+  error?: string;
+
+  // Timestamps
+  created_at: string;
+  queued_at?: string;
+  sent_at?: string;
+  delivered_at?: string;
+  read_at?: string;
+  failed_at?: string;
+}
+
+export interface MessageVariable {
+  trigger: MessageTrigger;
+  variable_name: string;
+  variable_key: string;   // {{name}}, {{email}}, etc.
+  description: string;
+  example_value: string;
+}
+
+// Para crear/actualizar mensajes
+export interface AutomatedMessageInput {
+  name: string;
+  description?: string;
+  trigger: MessageTrigger;
+  channel: MessageChannel;
+  message_template: string;
+  enabled?: boolean;
+  delay_seconds?: number;
+  schedule_start?: string;
+  schedule_end?: string;
+  schedule_days?: number[];
+  conditions?: Record<string, unknown>;
+}
+
+// Respuesta del endpoint de n8n para obtener plantilla
+export interface N8NMessageTemplate {
+  id: string;
+  channel: MessageChannel;
+  template: string;
+  delay_seconds: number;
+  variables: Record<string, string>;  // Variables ya renderizadas
+}

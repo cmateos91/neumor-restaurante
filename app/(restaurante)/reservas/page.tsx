@@ -29,20 +29,53 @@ export default function Reservas() {
 
     try {
       if (sitioId) {
-        // Guardar en sitio_reservas
-        const { error: insertError } = await supabase.from('sitio_reservas').insert({
-          sitio_id: sitioId,
-          nombre: formData.nombre,
-          email: formData.email,
-          telefono: formData.telefono,
-          fecha: formData.fecha,
-          hora: formData.hora,
-          personas: formData.personas,
-          notas: formData.notas || null,
-          estado: 'pendiente'
-        });
+        // 1. Guardar en sitio_reservas y OBTENER la reserva creada
+        // Usamos .select().single() para que nos devuelva el objeto insertado
+        const { data: reserva, error: insertError } = await supabase
+          .from('sitio_reservas')
+          .insert({
+            sitio_id: sitioId,
+            nombre: formData.nombre,
+            email: formData.email,
+            telefono: formData.telefono,
+            fecha: formData.fecha,
+            hora: formData.hora,
+            personas: formData.personas,
+            notas: formData.notas || null,
+            estado: 'pendiente'
+          })
+          .select() // Esto es crucial para que devuelva los datos
+          .single();
 
         if (insertError) throw insertError;
+
+        // 2. Si la reserva se creó correctamente (tenemos un ID), enviamos las notificaciones
+        if (reserva?.id) {
+          
+          // A) Notificación interna (opcional, si ya la tenías configurada)
+          fetch('/api/reservas/email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reservaId: reserva.id, tipo: 'nueva' })
+          }).catch(console.error);
+
+          // B) --- INTEGRACIÓN CON N8N ---
+          // Enviamos los datos a nuestra API interna, que a su vez los enviará a N8N de forma segura
+          fetch('/api/trigger-n8n', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              nombre: formData.nombre,
+              email: formData.email,
+              fecha: formData.fecha,
+              hora: formData.hora,
+              personas: formData.personas,
+              notas: formData.notas,
+              tipo_mensaje: 'confirmacion_cliente' // Etiqueta útil para filtrar en N8N
+            })
+          }).catch(err => console.error('Error llamando a N8N:', err));
+          // ---------------------------
+        }
       }
 
       setSubmitted(true);

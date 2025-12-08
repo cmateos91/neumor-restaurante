@@ -13,6 +13,11 @@ function RestaurantLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { config, loading } = useRestaurant();
+  // Obtener el tema o usar default
+  const currentTheme = config?.tema || 'soft-light';
+
+
+  
 
   // Escuchar navegacion desde el admin
   useEffect(() => {
@@ -23,6 +28,17 @@ function RestaurantLayoutContent({ children }: { children: React.ReactNode }) {
         const targetPath = event.data.data?.path;
         if (targetPath && targetPath !== pathname) {
           router.push(targetPath);
+        }
+      }
+
+      if (event.data?.type === 'admin:theme') {
+        const newTheme = event.data.data?.theme;
+      // Forzar actualización del tema localmente si no queremos esperar al re-fetch
+      // Una forma sucia pero efectiva para preview visual inmediata es manipular el DOM directamente
+      // o usar un estado local que tenga preferencia sobre el config.
+        const container = document.querySelector('[data-theme]');
+      if (container && newTheme) {
+        container.setAttribute('data-theme', newTheme);
         }
       }
     };
@@ -86,9 +102,11 @@ function RestaurantLayoutContent({ children }: { children: React.ReactNode }) {
       <link rel="dns-prefetch" href="https://saynqnmpxerpfgfdpsbx.supabase.co" />
       <link rel="preconnect" href="https://saynqnmpxerpfgfdpsbx.supabase.co" />
 
-      <div className="min-h-screen bg-[#e6e6e6]">
+      <div className="min-h-screen transition-colors duration-500" data-theme={currentTheme}>
+        <div className="min-h-screen bg-[var(--neuro-bg)] text-[var(--text-primary)]">
+        </div>
         {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-[#e6e6e6] px-4 py-4">
+      <nav className="sticky top-0 z-50 px-4 py-4 backdrop-blur-sm bg-[var(--neuro-bg)]/80">
         <div className="max-w-7xl mx-auto">
           <div className="neuro-flat rounded-3xl px-6 py-4">
             <div className="flex items-center justify-between">
@@ -163,7 +181,7 @@ function RestaurantLayoutContent({ children }: { children: React.ReactNode }) {
       </main>
 
       {/* Footer */}
-      <footer className="mt-20 px-4 py-12 bg-[#e6e6e6]">
+      <footer className="mt-20 px-4 py-12 bg-[var(--neuro-bg)]">
         <div className="max-w-7xl mx-auto">
           <div className="neuro-flat rounded-3xl px-8 py-12">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">

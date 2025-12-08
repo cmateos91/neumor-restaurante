@@ -43,9 +43,12 @@ export interface SitioConfig {
   tiktok: string | null;
   web: string | null;
   mapa_embed_url: string | null;
+  tema: string; // <--- NUEVO CAMPO
   created_at: string;
   updated_at: string;
 }
+
+
 
 // Textos JSONB por página
 export interface SitioTextos {

@@ -1,11 +1,120 @@
-:root {
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root, [data-theme='soft-light'] {
+  --neuro-bg: #e6e6e6;
   --neuro-light: #ffffff;
   --neuro-dark: #d1d1d1;
-  --neuro-bg: #e6e6e6;
-  --accent-gold: #d4af37;
   --text-primary: #2c2c2c;
   --text-secondary: #666666;
+  --accent-gold: #d4af37;
+  --accent-text: #ffffff;
 }
+
+[data-theme='soft-dark'] {
+  --neuro-bg: #2d2d2d;
+  --neuro-light: #3e3e3e;
+  --neuro-dark: #1e1e1e;
+  --text-primary: #e0e0e0;
+  --text-secondary: #a0a0a0;
+  --accent-gold: #d4af37;
+  --accent-text: #ffffff;
+}
+
+/* 2. Neumo Vibrant - Colores más vivos y modernos */
+[data-theme='vibrant-light'] {
+  --neuro-bg: #EEF2F6;
+  --neuro-light: #ffffff;
+  --neuro-dark: #D4D8DD;
+  --text-primary: #1E293B;
+  --text-secondary: #475569;
+  --accent-gold: #6366F1; /* Indigo */
+  --accent-text: #ffffff;
+}
+
+[data-theme='vibrant-dark'] {
+  --neuro-bg: #111827; /* Slate 900 */
+  --neuro-light: #1F2937;
+  --neuro-dark: #000000;
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --accent-gold: #818CF8; /* Indigo Light */
+  --accent-text: #000000;
+}
+
+/* 3. Neumo Glass - Efecto cristal (Overrides específicos) */
+[data-theme='glass-light'] {
+  --neuro-bg: #e0e5ec; /* Fondo base plano */
+  /* En Glass, light/dark controlan los bordes y brillos */
+  --neuro-light: rgba(255, 255, 255, 0.8); 
+  --neuro-dark: rgba(163, 177, 198, 0.6);
+  --text-primary: #333333;
+  --text-secondary: #555555;
+  --accent-gold: #008080; /* Teal */
+  --accent-text: #ffffff;
+}
+
+[data-theme='glass-dark'] {
+  --neuro-bg: #161616;
+  --neuro-light: rgba(255, 255, 255, 0.1);
+  --neuro-dark: rgba(0, 0, 0, 0.5);
+  --text-primary: #ffffff;
+  --text-secondary: #aaaaaa;
+  --accent-gold: #00bfff; /* Deep Sky Blue */
+  --accent-text: #000000;
+}
+
+/* APLICACIÓN DE ESTILOS GLOBALES */
+body {
+  background-color: var(--neuro-bg);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* CLASES DE UTILIDAD (Adaptadas para usar las variables) */
+.neuro-flat {
+  background: var(--neuro-bg);
+  box-shadow: 8px 8px 16px var(--neuro-dark), -8px -8px 16px var(--neuro-light);
+  border: 1px solid transparent; /* Preparado para Glass */
+}
+
+.neuro-pressed {
+  background: var(--neuro-bg);
+  box-shadow: inset 4px 4px 8px var(--neuro-dark), inset -4px -4px 8px var(--neuro-light);
+}
+
+.neuro-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.neuro-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 12px 12px 20px var(--neuro-dark), -10px -10px 20px var(--neuro-light);
+}
+
+/* OVERRIDES ESPECÍFICOS PARA GLASSMORPHISM */
+[data-theme*='glass'] .neuro-flat {
+  background: rgba(255, 255, 255, 0.1); /* Semi-transparente */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--neuro-light);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+}
+
+[data-theme*='glass-dark'] .neuro-flat {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Text Colors */
+h1, h2, h3, h4, h5, h6 { color: var(--text-primary) !important; }
+p, span, li { color: var(--text-secondary); }
+
+/* Accent Colors Overrides */
+.text-\[\#d4af37\] { color: var(--accent-gold) !important; }
+.bg-\[\#d4af37\] { background-color: var(--accent-gold) !important; }
 
 .neuro-flat {
   background: var(--neuro-bg);

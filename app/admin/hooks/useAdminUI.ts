@@ -3,8 +3,8 @@
 import { useState, useCallback } from 'react';
 import { PageSection, defaultHomeLayout } from '@/lib/page-builder.types';
 
-// Tipos
-export type Tab = 'restaurante' | 'menu' | 'galeria' | 'features';
+// 1. AQUI AGREGAMOS 'design'
+export type Tab = 'restaurante' | 'menu' | 'galeria' | 'features' | 'design';
 export type Device = 'desktop' | 'tablet' | 'mobile';
 
 export interface Message {
@@ -21,11 +21,13 @@ export const pages = [
   { label: 'Contacto', value: '/contacto' }
 ];
 
+// 2. AQUI AGREGAMOS LA DEFINICION VISUAL DE LA PESTAÑA
 export const tabs: { id: Tab; label: string; iconName: string }[] = [
   { id: 'restaurante', label: 'Info', iconName: 'Store' },
   { id: 'menu', label: 'Menu', iconName: 'UtensilsCrossed' },
   { id: 'galeria', label: 'Galeria', iconName: 'Image' },
-  { id: 'features', label: 'Features', iconName: 'Sparkles' }
+  { id: 'features', label: 'Features', iconName: 'Sparkles' },
+  { id: 'design', label: 'Diseño', iconName: 'Palette' } // Nuevo
 ];
 
 export const deviceWidths: Record<Device, string> = {
@@ -34,12 +36,13 @@ export const deviceWidths: Record<Device, string> = {
   mobile: '375px'
 };
 
-// Mapeo de tabs a páginas del iframe
+// 3. AQUI MAPEA 'design' A LA PAGINA DE INICIO
 export const tabToPage: Record<Tab, string> = {
   restaurante: '/',
   menu: '/menu',
   galeria: '/galeria',
-  features: '/'
+  features: '/',
+  design: '/' // Nuevo: Al hacer clic, muestra la home
 };
 
 // Mapeo de páginas a tabs (inverso)
@@ -129,7 +132,7 @@ export function useAdminUI(): UseAdminUIReturn {
   const toggleExpandedSection = useCallback((section: string) => {
     setExpandedSections(prev => ({
       ...prev,
-      [section]: !prev[section]
+      ...{ [section]: !prev[section] }
     }));
   }, []);
 

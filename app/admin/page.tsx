@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Store, UtensilsCrossed, Image, Sparkles, Loader2, GripVertical, Eye, EyeOff, Layers } from 'lucide-react';
+import { Store, UtensilsCrossed, Image, Sparkles, Loader2, GripVertical, Eye, EyeOff, Layers, Palette } from 'lucide-react';
 
 // Hooks
 import {
@@ -11,7 +11,7 @@ import {
   useDialogs,
   usePendingFiles,
   usePendingDeletes,
-  tabs,
+  tabs, // <--- IMPORTANTE: Ahora importamos 'tabs' desde aquí (asegúrate de haber actualizado hooks/useAdminUI.ts)
   tabToPage,
   pageToTab
 } from './hooks';
@@ -34,12 +34,13 @@ import {
 // Types
 import type { AdminView } from './components';
 
-// Iconos para los tabs
+// Mapeo de iconos (Relaciona el string del hook con el componente visual)
 const tabIcons = {
   Store,
   UtensilsCrossed,
   Image,
-  Sparkles
+  Sparkles,
+  Palette
 };
 
 export default function AdminEditor() {
@@ -110,7 +111,7 @@ export default function AdminEditor() {
     closeInput
   } = useDialogs();
 
-  // Hook de archivos pendientes (subida diferida)
+  // Hook de archivos pendientes
   const {
     addPendingFile,
     removePendingFile,
@@ -120,7 +121,7 @@ export default function AdminEditor() {
     uploadAllPending
   } = usePendingFiles();
 
-  // Hook de eliminaciones pendientes (eliminación diferida)
+  // Hook de eliminaciones pendientes
   const {
     markForDeletion,
     unmarkForDeletion,
@@ -156,12 +157,10 @@ export default function AdminEditor() {
         setSelectedSection(sectionId);
       },
       onNavigate: (path) => {
-        // Actualizar el tab según la página del iframe
         const newTab = pageToTab[path];
         if (newTab && newTab !== activeTab) {
           setActiveTab(newTab);
         }
-        // También actualizar currentPage si es diferente
         if (path !== currentPage) {
           setCurrentPage(path);
         }
@@ -169,19 +168,17 @@ export default function AdminEditor() {
     }
   });
 
-  // Sincronizar datos con iframe cuando cambian (excluyendo items marcados para eliminación)
+  // Sincronizaciones con iframe
   useEffect(() => {
     sendRestauranteData(formRestaurante);
   }, [formRestaurante, sendRestauranteData]);
 
   useEffect(() => {
-    // Filtrar items marcados para eliminación
     const filteredMenuItems = menuItems.filter(item => !isMarkedForDeletion(item.id));
     sendMenuData(categorias, filteredMenuItems);
   }, [categorias, menuItems, sendMenuData, isMarkedForDeletion]);
 
   useEffect(() => {
-    // Filtrar items marcados para eliminación y ocultos
     const filteredGaleria = galeria.filter(item =>
       !isMarkedForDeletion(item.id) && item.visible !== false
     );
@@ -192,7 +189,6 @@ export default function AdminEditor() {
     sendFeaturesData(features);
   }, [features, sendFeaturesData]);
 
-  // Sincronizar activeTab → iframe (navegar usando SPA, sin recargar)
   useEffect(() => {
     const targetPage = tabToPage[activeTab];
     if (targetPage) {
@@ -217,56 +213,41 @@ export default function AdminEditor() {
     setSaving(true);
 
     try {
-      // Copias locales para actualizar con las nuevas URLs
       let updatedGaleria = [...galeria];
       let updatedMenuItems = [...menuItems];
 
-      // 1. Primero ejecutar eliminaciones pendientes si hay
       if (hasPendingDeletes) {
         showMessage('info', `Eliminando ${pendingDeleteCount} elemento(s)...`);
-
         const { deletedGaleria, deletedMenu } = await executeAllDeletes();
-
-        // Filtrar los items eliminados de las copias locales
         updatedGaleria = updatedGaleria.filter(g => !deletedGaleria.includes(g.id));
         updatedMenuItems = updatedMenuItems.filter(m => !deletedMenu.includes(m.id));
-
-        // Actualizar el estado local para que la UI refleje las eliminaciones
         setGaleria(updatedGaleria);
         setMenuItems(updatedMenuItems);
       }
 
-      // 2. Luego subir archivos pendientes si hay
       if (hasPendingFiles) {
         showMessage('info', `Subiendo ${pendingCount} imagen(es)...`);
-
         const uploadedUrls = await uploadAllPending((uploaded, total) => {
           console.log(`Subido ${uploaded}/${total}`);
         });
 
-        // Actualizar las URLs en las copias locales Y en el estado
         for (const [id, newUrl] of uploadedUrls) {
           if (id.startsWith('galeria-')) {
             const galeriaId = id.replace('galeria-', '');
-            // Actualizar copia local
             updatedGaleria = updatedGaleria.map(g =>
               g.id === galeriaId ? { ...g, url: newUrl } : g
             );
-            // Actualizar estado para la UI
             updateGaleriaItem(galeriaId, 'url', newUrl);
           } else if (id.startsWith('menu-')) {
             const menuId = id.replace('menu-', '');
-            // Actualizar copia local
             updatedMenuItems = updatedMenuItems.map(m =>
               m.id === menuId ? { ...m, imagen_url: newUrl } : m
             );
-            // Actualizar estado para la UI
             updateMenuItem(menuId, 'imagen_url', newUrl);
           }
         }
       }
 
-      // 3. Guardar con los datos actualizados (excluyendo eliminados)
       const success = await saveRestaurante({
         galeria: updatedGaleria,
         menuItems: updatedMenuItems
@@ -327,113 +308,120 @@ export default function AdminEditor() {
       {/* Message Toast */}
       <MessageToast message={message} />
 
-      {/* Main Content - Renderizado condicional segun vista */}
+      {/* Main Content */}
       {currentView === 'dashboard' ? (
-        /* Dashboard View - Conectado con Supabase */
         <DashboardContainer sitioId={sitio?.id} />
       ) : (
-        /* Editor View */
         <div className="flex-1 flex gap-4 min-h-0">
           {/* Left Panel - Editor */}
           <div className="w-96 flex flex-col gap-4">
-          {/* Page Builder Panel */}
-          {pageBuilderMode && (
-            <PageBuilderPanel
-              pageLayout={pageLayout}
-              selectedSection={selectedSection}
-              onToggleVisibility={(sectionId) => {
-                toggleSectionVisibility(sectionId);
-                sendPageBuilderCommand('update-layout', { sections: pageLayout });
-              }}
-            />
-          )}
+            {/* Page Builder Panel */}
+            {pageBuilderMode && (
+              <PageBuilderPanel
+                pageLayout={pageLayout}
+                selectedSection={selectedSection}
+                onToggleVisibility={(sectionId) => {
+                  toggleSectionVisibility(sectionId);
+                  sendPageBuilderCommand('update-layout', { sections: pageLayout });
+                }}
+              />
+            )}
 
-          {/* Tabs - solo si no está en page builder mode */}
-          {!pageBuilderMode && (
-            <div className="neuro-card p-2 flex gap-1">
-              {tabs.map(tab => {
-                const Icon = tabIcons[tab.iconName as keyof typeof tabIcons];
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`neuro-tab flex-1 flex items-center justify-center gap-2 ${
-                      activeTab === tab.id ? 'active' : ''
-                    }`}
-                  >
-                    {Icon && <Icon className="w-4 h-4" />}
-                    <span className="text-sm">{tab.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          )}
+            {/* Tabs - Solo si no está en page builder mode */}
+            {!pageBuilderMode && (
+              <div className="neuro-card p-2 flex gap-1">
+                {tabs.map(tab => {
+                  const Icon = tabIcons[tab.iconName as keyof typeof tabIcons];
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`neuro-tab flex-1 flex items-center justify-center gap-2 ${
+                        activeTab === tab.id ? 'active' : ''
+                      }`}
+                    >
+                      {Icon && <Icon className="w-4 h-4" />}
+                      <span className="text-sm">{tab.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
 
-          {/* Panel Content */}
-          {!pageBuilderMode && (
-            <div className="flex-1 neuro-card p-4 overflow-y-auto neuro-scroll">
-              {activeTab === 'restaurante' && (
-                <RestauranteTab
-                  formRestaurante={formRestaurante}
-                  setFormRestaurante={setFormRestaurante}
-                  expandedPage={expandedPage}
-                  setExpandedPage={setExpandedPage}
-                />
-              )}
+            {/* Panel Content */}
+            {!pageBuilderMode && (
+              <div className="flex-1 neuro-card p-4 overflow-y-auto neuro-scroll">
+                {activeTab === 'restaurante' && (
+                  <RestauranteTab
+                    formRestaurante={formRestaurante}
+                    setFormRestaurante={setFormRestaurante}
+                    expandedPage={expandedPage}
+                    setExpandedPage={setExpandedPage}
+                  />
+                )}
 
-              {activeTab === 'menu' && (
-                <MenuTab
-                  sitio={sitio}
-                  categorias={categorias}
-                  menuItems={menuItems}
-                  onAddCategoria={addCategoria}
-                  onAddMenuItem={addMenuItem}
-                  onUpdateMenuItem={updateMenuItem}
-                  onDeleteMenuItem={deleteMenuItem}
-                  onRefresh={refreshIframe}
-                  promptText={promptText}
-                  addPendingFile={addPendingFile}
-                  removePendingFile={removePendingFile}
-                  isPending={isPending}
-                  markForDeletion={markForDeletion}
-                  unmarkForDeletion={unmarkForDeletion}
-                  isMarkedForDeletion={isMarkedForDeletion}
-                />
-              )}
+                {activeTab === 'menu' && (
+                  <MenuTab
+                    sitio={sitio}
+                    categorias={categorias}
+                    menuItems={menuItems}
+                    onAddCategoria={addCategoria}
+                    onAddMenuItem={addMenuItem}
+                    onUpdateMenuItem={updateMenuItem}
+                    onDeleteMenuItem={deleteMenuItem}
+                    onRefresh={refreshIframe}
+                    promptText={promptText}
+                    addPendingFile={addPendingFile}
+                    removePendingFile={removePendingFile}
+                    isPending={isPending}
+                    markForDeletion={markForDeletion}
+                    unmarkForDeletion={unmarkForDeletion}
+                    isMarkedForDeletion={isMarkedForDeletion}
+                  />
+                )}
 
-              {activeTab === 'galeria' && (
-                <GaleriaTab
-                  sitio={sitio}
-                  galeria={galeria}
-                  onAddItem={addGaleriaItem}
-                  onToggleHome={toggleGaleriaHome}
-                  onToggleVisible={toggleGaleriaVisible}
-                  onUpdateItem={updateGaleriaItem}
-                  onDeleteItem={deleteGaleriaItem}
-                  onRefresh={refreshIframe}
-                  addPendingFile={addPendingFile}
-                  removePendingFile={removePendingFile}
-                  isPending={isPending}
-                  markForDeletion={markForDeletion}
-                  unmarkForDeletion={unmarkForDeletion}
-                  isMarkedForDeletion={isMarkedForDeletion}
-                />
-              )}
+                {activeTab === 'galeria' && (
+                  <GaleriaTab
+                    sitio={sitio}
+                    galeria={galeria}
+                    onAddItem={addGaleriaItem}
+                    onToggleHome={toggleGaleriaHome}
+                    onToggleVisible={toggleGaleriaVisible}
+                    onUpdateItem={updateGaleriaItem}
+                    onDeleteItem={deleteGaleriaItem}
+                    onRefresh={refreshIframe}
+                    addPendingFile={addPendingFile}
+                    removePendingFile={removePendingFile}
+                    isPending={isPending}
+                    markForDeletion={markForDeletion}
+                    unmarkForDeletion={unmarkForDeletion}
+                    isMarkedForDeletion={isMarkedForDeletion}
+                  />
+                )}
 
-              {activeTab === 'features' && (
-                <FeaturesTab
-                  sitio={sitio}
-                  features={features}
-                  onAddFeature={addFeature}
-                  onUpdateFeature={updateFeature}
-                  onDeleteFeature={deleteFeature}
-                  onRefresh={refreshIframe}
-                  confirmDelete={confirmDelete}
-                />
-              )}
-            </div>
-          )}
-        </div>
+                {activeTab === 'features' && (
+                  <FeaturesTab
+                    sitio={sitio}
+                    features={features}
+                    onAddFeature={addFeature}
+                    onUpdateFeature={updateFeature}
+                    onDeleteFeature={deleteFeature}
+                    onRefresh={refreshIframe}
+                    confirmDelete={confirmDelete}
+                  />
+                )}
+
+                {/* --- 3. AQUI AGREGAMOS LA LOGICA PARA EL TAB DE DISEÑO --- */}
+                {activeTab === 'design' && (
+                   <div className="flex flex-col items-center justify-center h-full text-gray-400 p-8 text-center">
+                      <Palette className="w-12 h-12 mb-3 opacity-20" />
+                      <p className="font-medium">Panel de Diseño</p>
+                      <p className="text-xs mt-1">Aquí irán las opciones de tipografía y colores.</p>
+                   </div>
+                )}
+              </div>
+            )}
+          </div>
 
           {/* Right Panel - Preview */}
           <DevicePreview

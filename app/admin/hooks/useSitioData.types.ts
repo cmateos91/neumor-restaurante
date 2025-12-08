@@ -12,6 +12,8 @@ import type {
 // ===== FORM RESTAURANTE =====
 
 export interface FormRestaurante {
+  // Configuración Global (NUEVO)
+  tema: string; // <--- Añade esta línea aquí
   // Inicio - Hero
   nombre: string;
   tagline: string;
@@ -62,6 +64,7 @@ export interface FormRestaurante {
 }
 
 export const defaultFormRestaurante: FormRestaurante = {
+  tema: 'soft-light', // <--- Añade también el valor por defecto aquí
   nombre: '',
   tagline: '',
   descripcion: '',

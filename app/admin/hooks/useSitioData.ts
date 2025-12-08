@@ -96,7 +96,8 @@ export function useSitioData(): UseSitioDataReturn {
           instagram: config?.instagram || '', facebook: config?.facebook || '', twitter: config?.twitter || '',
           mapa_embed_url: config?.mapa_embed_url || '',
           contacto_info_titulo: c.info_titulo || 'Cómo Llegar',
-          contacto_info_descripcion: c.info_descripcion || 'Ubicados en pleno corazón de la ciudad, cerca de las principales estaciones de transporte público.'
+          contacto_info_descripcion: c.info_descripcion || 'Ubicados en pleno corazón de la ciudad, cerca de las principales estaciones de transporte público.',
+          tema: config?.tema || 'soft-light' // Cargar tema
         });
 
         const [catRes, itemsRes, galRes, featRes] = await Promise.all([
@@ -136,7 +137,8 @@ export function useSitioData(): UseSitioDataReturn {
         direccion_cp: formRestaurante.direccion_cp, direccion_pais: formRestaurante.direccion_pais,
         horario_semana: formRestaurante.horario_semana, horario_finde: formRestaurante.horario_finde,
         instagram: formRestaurante.instagram, facebook: formRestaurante.facebook, twitter: formRestaurante.twitter,
-        mapa_embed_url: formRestaurante.mapa_embed_url
+        mapa_embed_url: formRestaurante.mapa_embed_url,
+        tema: formRestaurante.tema // Guardar tema
       }).eq('sitio_id', sitio.id);
 
       const textosUpdates = [

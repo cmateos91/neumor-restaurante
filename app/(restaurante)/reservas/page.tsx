@@ -261,10 +261,14 @@ export default function Reservas() {
                 <textarea
                   value={formData.notas}
                   onChange={(e) => handleChange('notas', e.target.value)}
+                  maxLength={300}
                   className="bg-transparent border-0 w-full outline-none text-[#2c2c2c] min-h-[100px] resize-none"
                   placeholder="Alergias, preferencias de mesa, ocasiones especiales..."
                 />
               </div>
+              <p className="text-xs text-[#888] text-right">
+                {formData.notas.length}/300 caracteres
+              </p>
             </div>
 
             {/* Submit Button */}

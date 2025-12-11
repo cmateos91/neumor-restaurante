@@ -6,8 +6,8 @@ export const adminTabs: { id: AdminTab; label: string; iconName: string }[] = [
   { id: 'inicio', label: 'Inicio', iconName: 'Home' },
   { id: 'menu', label: 'Menu', iconName: 'UtensilsCrossed' },
   { id: 'galeria', label: 'Galeria', iconName: 'Image' },
-  { id: 'reservas', label: 'Reservas', iconName: 'Calendar' },
-  { id: 'contacto', label: 'Contacto', iconName: 'Mail' }
+  { id: 'reservas', label: 'Reservas', iconName: 'CalendarClock' },
+  { id: 'contacto', label: 'Contacto', iconName: 'MapPin' }
 ];
 
 export const pagePaths: Record<AdminTab, string> = {

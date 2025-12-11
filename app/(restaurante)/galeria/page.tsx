@@ -35,8 +35,10 @@ export default function Galeria() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {visibleGallery.map((image) => (
-              <div
+              <EditableWrapper
                 key={image.id}
+                elementId="galeria.items"
+                as="article"
                 className="neuro-flat rounded-3xl p-4 neuro-hover group"
               >
                 <div className="neuro-pressed rounded-2xl overflow-hidden h-80 relative">
@@ -51,7 +53,7 @@ export default function Galeria() {
                     <h3 className="text-white font-semibold text-lg">{image.titulo || 'Imagen'}</h3>
                   </div>
                 </div>
-              </div>
+              </EditableWrapper>
             ))}
           </div>
         )}

@@ -32,9 +32,20 @@
   { "elementId": "contacto.info.titulo", "tab": "contacto", "page": "contacto", "inputName": "contacto_info_titulo", "component": "app/(restaurante)/contacto/page.tsx" },
   { "elementId": "contacto.info.descripcion", "tab": "contacto", "page": "contacto", "inputName": "contacto_info_descripcion", "component": "app/(restaurante)/contacto/page.tsx" },
 
-  { "elementId": "nav.inicio", "tab": "inicio", "page": "inicio", "inputName": "nav_inicio", "component": "app/admin/components/tabs/InicioTab.tsx" },
-  { "elementId": "nav.menu", "tab": "menu", "page": "menu", "inputName": "nav_menu", "component": "app/admin/components/tabs/InicioTab.tsx" },
-  { "elementId": "nav.galeria", "tab": "galeria", "page": "galeria", "inputName": "nav_galeria", "component": "app/admin/components/tabs/InicioTab.tsx" },
-  { "elementId": "nav.reservas", "tab": "reservas", "page": "reservas", "inputName": "nav_reservas", "component": "app/admin/components/tabs/InicioTab.tsx" },
-  { "elementId": "nav.contacto", "tab": "contacto", "page": "contacto", "inputName": "nav_contacto", "component": "app/admin/components/tabs/InicioTab.tsx" }
+  { "elementId": "nav.logo", "tab": "inicio", "page": "cabecera", "inputName": "nombre", "component": "app/(restaurante)/layout.tsx" },
+  { "elementId": "nav.inicio", "tab": "inicio", "page": "cabecera", "inputName": "nav_inicio", "component": "app/(restaurante)/layout.tsx" },
+  { "elementId": "nav.menu", "tab": "menu", "page": "cabecera", "inputName": "nav_menu", "component": "app/(restaurante)/layout.tsx" },
+  { "elementId": "nav.galeria", "tab": "galeria", "page": "cabecera", "inputName": "nav_galeria", "component": "app/(restaurante)/layout.tsx" },
+  { "elementId": "nav.reservas", "tab": "reservas", "page": "cabecera", "inputName": "nav_reservas", "component": "app/(restaurante)/layout.tsx" },
+  { "elementId": "nav.contacto", "tab": "contacto", "page": "cabecera", "inputName": "nav_contacto", "component": "app/(restaurante)/layout.tsx" },
+
+  { "elementId": "footer.nombre", "tab": "inicio", "page": "cabecera", "inputName": "nombre", "component": "app/(restaurante)/layout.tsx" },
+  { "elementId": "footer.descripcion", "tab": "inicio", "page": "footer", "inputName": "descripcion", "component": "app/(restaurante)/layout.tsx" },
+  { "elementId": "footer.horario_semana", "tab": "inicio", "page": "footer", "inputName": "horario_semana", "component": "app/(restaurante)/layout.tsx" },
+  { "elementId": "footer.horario_finde", "tab": "inicio", "page": "footer", "inputName": "horario_finde", "component": "app/(restaurante)/layout.tsx" },
+  { "elementId": "footer.telefono", "tab": "inicio", "page": "footer", "inputName": "telefono", "component": "app/(restaurante)/layout.tsx" },
+  { "elementId": "footer.email", "tab": "inicio", "page": "footer", "inputName": "email", "component": "app/(restaurante)/layout.tsx" },
+  { "elementId": "footer.copyright", "tab": "inicio", "page": "footer", "component": "app/(restaurante)/layout.tsx" },
+
+  { "elementId": "galeria.items", "tab": "galeria", "page": "galeria", "component": "app/(restaurante)/galeria/page.tsx" }
 ]

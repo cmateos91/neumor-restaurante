@@ -36,7 +36,7 @@ const statusLabels: Record<Lead['status'], { label: string; color: string }> = {
   lost: { label: 'Perdido', color: 'bg-gray-100 text-gray-700' }
 };
 
-export function LeadsTable({ leads, onLeadClick, onStatusChange }: LeadsTableProps) {
+export function LeadsTable({ leads, onLeadClick }: LeadsTableProps) {
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState<'name' | 'createdAt'>('createdAt');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');

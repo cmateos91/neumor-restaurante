@@ -110,7 +110,6 @@ export default function AdminEditor() {
     closeConfirm,
     inputState,
     promptText,
-    promptUrl,
     closeInput
   } = useDialogs();
 

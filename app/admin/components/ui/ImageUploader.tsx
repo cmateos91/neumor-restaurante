@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useCallback } from 'react';
+import Image from 'next/image';
 import { Upload, X, Image as ImageIcon, Loader2, Link2, AlertCircle, Clock } from 'lucide-react';
 import { uploadImage, validateFile, isSupabaseStorageUrl, UploadProgress } from '@/lib/storage';
 
@@ -154,7 +155,13 @@ export function ImageUploader({
         {value ? (
           <>
             <div className="relative w-10 h-10 rounded-lg overflow-hidden neuro-inset flex-shrink-0">
-              <img src={value} alt="" className="w-full h-full object-cover" />
+              <Image
+                src={value}
+                alt="Vista previa"
+                fill
+                className="object-cover"
+                sizes="256px"
+              />
               {(isLocalPreview || hasPendingFile) && (
                 <div className="absolute inset-0 bg-amber-500/20 flex items-center justify-center">
                   <Clock className="w-4 h-4 text-amber-600" />
@@ -231,11 +238,13 @@ export function ImageUploader({
       {value ? (
         <div className="relative group">
           <div className="aspect-video rounded-xl overflow-hidden neuro-inset">
-            <img
-              src={value}
-              alt="Preview"
-              className="w-full h-full object-cover"
-            />
+                <Image
+                  src={value}
+                  alt="Vista previa"
+                  fill
+                  className="object-cover"
+                  sizes="100vw"
+                />
           </div>
           <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl flex items-center justify-center gap-2">
             <button

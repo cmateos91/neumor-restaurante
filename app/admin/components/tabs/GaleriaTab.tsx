@@ -1,7 +1,8 @@
+/* eslint-disable @next/next/no-img-element */
 'use client';
 
 import React, { useState } from 'react';
-import { Trash2, Eye, EyeOff, RefreshCw, Image, ChevronDown, ChevronUp, Undo2 } from 'lucide-react';
+import { Trash2, Eye, EyeOff, RefreshCw, Image as ImageIcon, ChevronDown, ChevronUp, Undo2 } from 'lucide-react';
 import { SitioGaleria } from '@/lib/database.types';
 import { ImageUploader } from '../ui/ImageUploader';
 import { isSupabaseStorageUrl } from '@/lib/storage';
@@ -195,7 +196,11 @@ export function GaleriaTab({
               {/* Header con preview y acciones rapidas */}
               <div className="p-3 flex items-center gap-3">
                 <div className="relative w-16 h-16 rounded-lg overflow-hidden neuro-inset flex-shrink-0">
-                  <img src={img.url} alt="" className={`w-full h-full object-cover ${!img.visible ? 'grayscale' : ''}`} />
+                  <img
+                    src={img.url}
+                    alt={img.titulo || 'Imagen'}
+                    className={`w-full h-full object-cover ${!img.visible ? 'grayscale' : ''}`}
+                  />
                   {markedForDeletion && (
                     <div className="absolute inset-0 bg-red-500/50 flex items-center justify-center">
                       <Trash2 className="w-5 h-5 text-white" />
@@ -324,8 +329,8 @@ export function GaleriaTab({
       </div>
 
       {galeria.length === 0 && sitio && (
-        <div className="neuro-card-sm p-8 text-center">
-          <Image className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+          <div className="neuro-card-sm p-8 text-center">
+          <ImageIcon className="w-12 h-12 mx-auto mb-3 text-gray-300" />
           <p className="text-gray-500 mb-2">No hay imagenes en la galeria</p>
           <p className="text-gray-400 text-xs">Sube tu primera imagen usando el area de arriba</p>
         </div>

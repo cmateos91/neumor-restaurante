@@ -38,14 +38,15 @@ export function InputDialog({
 
   // Reset value when modal opens
   useEffect(() => {
-    if (isOpen) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (!isOpen) return;
+
+    const timer = setTimeout(() => {
       setValue(defaultValue);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setError('');
-      // Focus input after animation
-      setTimeout(() => inputRef.current?.focus(), 100);
-    }
+      inputRef.current?.focus();
+    }, 0);
+
+    return () => clearTimeout(timer);
   }, [isOpen, defaultValue]);
 
   const validate = (): boolean => {

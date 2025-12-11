@@ -79,7 +79,6 @@ export function ContactoTab({
 // === Componentes auxiliares ===
 
 interface PageSectionProps {
-  id: string;
   label: string;
   icon: React.ComponentType<{ className?: string }>;
   expanded: boolean;
@@ -87,7 +86,7 @@ interface PageSectionProps {
   children: React.ReactNode;
 }
 
-function PageSection({ id, label, icon: Icon, expanded, onToggle, children }: PageSectionProps) {
+function PageSection({ label, icon: Icon, expanded, onToggle, children }: PageSectionProps) {
   return (
     <div className="neuro-card-sm overflow-hidden">
       <button

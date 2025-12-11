@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { RestauranteMenuCategoria, RestauranteMenuItem, RestauranteMenuCategoriaInsert, RestauranteMenuItemInsert } from '@/lib/database.types';
+import { RestauranteMenuCategoria, RestauranteMenuItem, RestauranteMenuItemInsert } from '@/lib/database.types';
 import { Plus, Pencil, Trash2, Loader2, X, GripVertical } from 'lucide-react';
 
 export default function AdminMenu() {

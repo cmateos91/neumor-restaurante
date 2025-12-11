@@ -2,7 +2,6 @@ import { supabase } from './supabase';
 import {
   Sitio,
   SitioConfig,
-  SitioTextos,
   SitioGaleria,
   SitioFeature,
   SitioReserva,

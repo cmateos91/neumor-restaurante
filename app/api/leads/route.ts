@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import type { Lead, LeadStatus, LeadSource, LeadPriority } from '@/lib/integrations.types';
+import type { LeadStatus, LeadSource, LeadPriority } from '@/lib/integrations.types';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,

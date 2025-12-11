@@ -17,3 +17,8 @@ export * from './useDialog';
 export * from './usePendingFiles';
 export * from './usePendingDeletes';
 export * from './useDashboardData';
+export * from './useSitioConfig';
+export * from './useMenuData';
+export * from './useGaleriaData';
+export * from './useFeaturesData';
+export * from './useLeadsData';

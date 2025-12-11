@@ -1,0 +1,9 @@
+{
+  "tabs": [
+    { "id": "inicio", "label": "Inicio", "iconName": "Home", "path": "/" },
+    { "id": "menu", "label": "Menu", "iconName": "UtensilsCrossed", "path": "/menu" },
+    { "id": "galeria", "label": "Galeria", "iconName": "Image", "path": "/galeria" },
+    { "id": "reservas", "label": "Reservas", "iconName": "Calendar", "path": "/reservas" },
+    { "id": "contacto", "label": "Contacto", "iconName": "Mail", "path": "/contacto" }
+  ]
+}

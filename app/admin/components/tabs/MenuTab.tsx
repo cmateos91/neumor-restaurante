@@ -3,8 +3,8 @@
 import React, { useState } from 'react';
 import { Plus, Trash2, Eye, EyeOff, RefreshCw, UtensilsCrossed, ChevronDown, ChevronUp, Undo2 } from 'lucide-react';
 import { SitioMenuCategoria, SitioMenuItem } from '@/lib/database.types';
+import Image from 'next/image';
 import { ImageUploader } from '../ui/ImageUploader';
-import { isSupabaseStorageUrl } from '@/lib/storage';
 import { FormRestaurante } from '../../hooks/useSitioData';
 
 interface MenuTabProps {
@@ -211,7 +211,12 @@ export function MenuTab({
                     {/* Preview de imagen */}
                     {item.imagen_url ? (
                       <div className="relative w-10 h-10 rounded overflow-hidden flex-shrink-0 neuro-inset">
-                        <img src={item.imagen_url} alt="" className="w-full h-full object-cover" />
+                        <Image
+                          src={item.imagen_url}
+                          alt={item.nombre || 'Plato'}
+                          className="w-full h-full object-cover"
+                          fill
+                        />
                         {markedForDeletion && (
                           <div className="absolute inset-0 bg-red-500/50 flex items-center justify-center">
                             <Trash2 className="w-4 h-4 text-white" />

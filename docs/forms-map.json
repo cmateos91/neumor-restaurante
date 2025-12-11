@@ -1,0 +1,43 @@
+{
+  "inicio": [
+    "nombre",
+    "tagline",
+    "descripcion",
+    "inicio_btn_menu",
+    "inicio_btn_reservas",
+    "inicio_features_titulo",
+    "inicio_features_subtitulo",
+    "inicio_galeria_titulo",
+    "inicio_galeria_subtitulo",
+    "inicio_galeria_btn",
+    "nav_inicio",
+    "nav_menu",
+    "nav_galeria",
+    "nav_reservas",
+    "nav_contacto"
+  ],
+  "menu": [
+    "menu_titulo",
+    "menu_subtitulo",
+    "menu_filtro_todos",
+    "menu_sin_items"
+  ],
+  "galeria": [
+    "galeria_titulo",
+    "galeria_subtitulo"
+  ],
+  "reservas": [
+    "reservas_titulo",
+    "reservas_subtitulo",
+    "reservas_btn_confirmar",
+    "reservas_btn_enviando",
+    "reservas_exito_titulo",
+    "reservas_exito_mensaje"
+  ],
+  "contacto": [
+    "contacto_titulo",
+    "contacto_subtitulo",
+    "contacto_info_titulo",
+    "contacto_info_descripcion"
+  ]
+}

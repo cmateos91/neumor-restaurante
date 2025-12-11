@@ -350,6 +350,7 @@ export function InicioTab({
 // === Componentes auxiliares ===
 
 interface PageSectionProps {
+  id?: string;
   label: string;
   icon: React.ComponentType<{ className?: string }>;
   expanded: boolean;
@@ -357,9 +358,9 @@ interface PageSectionProps {
   children: React.ReactNode;
 }
 
-function PageSection({ label, icon: Icon, expanded, onToggle, children }: PageSectionProps) {
+function PageSection({ id, label, icon: Icon, expanded, onToggle, children }: PageSectionProps) {
   return (
-    <div className="neuro-card-sm overflow-hidden">
+    <div id={id} className="neuro-card-sm overflow-hidden">
       <button
         onClick={onToggle}
         className="w-full px-4 py-3 flex items-center gap-3 text-left hover:bg-gray-50/50 transition-colors"

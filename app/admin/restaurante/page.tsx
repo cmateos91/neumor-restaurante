@@ -53,7 +53,6 @@ export default function AdminRestaurante() {
             .single();
 
           if (configData) {
-            setSitioConfig(configData);
             setForm({
               nombre: configData.nombre || '',
               tagline: configData.tagline || '',

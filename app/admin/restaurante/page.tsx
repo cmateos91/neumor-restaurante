@@ -2,12 +2,11 @@
 
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Sitio, SitioConfig, SitioConfigUpdate } from '@/lib/database.types';
+import { Sitio, SitioConfigUpdate } from '@/lib/database.types';
 import { Save, Loader2 } from 'lucide-react';
 
 export default function AdminRestaurante() {
   const [sitio, setSitio] = useState<Sitio | null>(null);
-  const [sitioConfig, setSitioConfig] = useState<SitioConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -54,7 +53,6 @@ export default function AdminRestaurante() {
             .single();
 
           if (configData) {
-            setSitioConfig(configData);
             setForm({
               nombre: configData.nombre || '',
               tagline: configData.tagline || '',

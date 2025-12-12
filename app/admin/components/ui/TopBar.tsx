@@ -20,7 +20,6 @@ interface TopBarProps {
   onPageBuilderToggle: () => void;
   onRefresh: () => void;
   onPublish: () => void;
-  // Nuevas props para vista
   currentView: AdminView;
   onViewChange: (view: AdminView) => void;
 }
@@ -56,7 +55,6 @@ export function TopBar({
       </div>
 
       <div className="flex items-center gap-3">
-        {/* Controles solo visibles en Editor View */}
         {isEditorView && (
           <>
             {/* Page Builder Mode Button */}

@@ -1,0 +1,7 @@
+{
+  "homeLayout": [
+    { "id": "hero", "type": "hero", "visible": true, "order": 0 },
+    { "id": "features", "type": "features-grid", "visible": true, "order": 1 },
+    { "id": "gallery", "type": "gallery-preview", "visible": true, "order": 2 }
+  ]
+}

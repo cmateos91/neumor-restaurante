@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useRef } from 'react';
-import { Store, UtensilsCrossed, Image, Sparkles, Loader2, GripVertical, Eye, EyeOff, Layers } from 'lucide-react';
+import { Store, UtensilsCrossed, Image, Sparkles, Loader2, GripVertical, Eye, EyeOff, Layers, CalendarClock, MapPin, Home } from 'lucide-react';
 
 // Hooks
 import {
@@ -37,10 +37,13 @@ import type { AdminView } from './components';
 
 // Iconos para los tabs
 const tabIcons = {
+  Home,
   Store,
   UtensilsCrossed,
   Image,
-  Sparkles
+  Sparkles,
+  CalendarClock,
+  MapPin
 };
 
 export default function AdminEditor() {
@@ -110,7 +113,6 @@ export default function AdminEditor() {
     closeConfirm,
     inputState,
     promptText,
-    promptUrl,
     closeInput
   } = useDialogs();
 

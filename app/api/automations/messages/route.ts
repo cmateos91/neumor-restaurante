@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import type { AutomatedMessage, AutomatedMessageInput, MessageTrigger, MessageChannel } from '@/lib/integrations.types';
+import type { AutomatedMessageInput, MessageTrigger, MessageChannel } from '@/lib/integrations.types';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,

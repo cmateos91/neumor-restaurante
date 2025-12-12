@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "npm run lint"
+    "test": "npm run lint && npm run validate-editables && npm run validate-schemas",
+    "validate-editables": "node scripts/validate-editables.js",
+    "validate-schemas": "node scripts/validate-schemas.js"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -29,6 +31,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.0.3",
     "tailwindcss": "4.0.3",
+    "ts-node": "^10.9.2",
     "typescript": "^5"
   }
 }

@@ -2,9 +2,8 @@
 
 import { useState, useCallback } from 'react';
 import { PageSection, defaultHomeLayout } from '@/lib/page-builder.types';
+import { adminTabs, pagePaths, pathToTab, type AdminTab } from '@/lib/contracts';
 
-// Tipos
-export type Tab = 'inicio' | 'menu' | 'galeria' | 'reservas' | 'contacto';
 export type Device = 'desktop' | 'tablet' | 'mobile';
 
 export interface Message {
@@ -13,21 +12,13 @@ export interface Message {
 }
 
 // Constantes
-export const pages = [
-  { label: 'Inicio', value: '/' },
-  { label: 'Menu', value: '/menu' },
-  { label: 'Galeria', value: '/galeria' },
-  { label: 'Reservas', value: '/reservas' },
-  { label: 'Contacto', value: '/contacto' }
-];
+export const pages = Object.entries(pagePaths).map(([label, value]) => ({
+  label: label.charAt(0).toUpperCase() + label.slice(1),
+  value
+}));
 
-export const tabs: { id: Tab; label: string; iconName: string }[] = [
-  { id: 'inicio', label: 'Inicio', iconName: 'Home' },
-  { id: 'menu', label: 'Menu', iconName: 'UtensilsCrossed' },
-  { id: 'galeria', label: 'Galeria', iconName: 'Image' },
-  { id: 'reservas', label: 'Reservas', iconName: 'Calendar' },
-  { id: 'contacto', label: 'Contacto', iconName: 'Mail' }
-];
+// Reexport para compatibilidad en el resto del código
+export const tabs = adminTabs;
 
 export const deviceWidths: Record<Device, string> = {
   desktop: '100%',
@@ -36,26 +27,14 @@ export const deviceWidths: Record<Device, string> = {
 };
 
 // Mapeo de tabs a páginas del iframe
-export const tabToPage: Record<Tab, string> = {
-  inicio: '/',
-  menu: '/menu',
-  galeria: '/galeria',
-  reservas: '/reservas',
-  contacto: '/contacto'
-};
+export const tabToPage: Record<AdminTab, string> = pagePaths;
 
 // Mapeo de páginas a tabs (inverso)
-export const pageToTab: Record<string, Tab> = {
-  '/': 'inicio',
-  '/menu': 'menu',
-  '/galeria': 'galeria',
-  '/reservas': 'reservas',
-  '/contacto': 'contacto'
-};
+export const pageToTab: Record<string, AdminTab> = pathToTab;
 
 // Interface para el estado del hook
 export interface AdminUIState {
-  activeTab: Tab;
+  activeTab: AdminTab;
   device: Device;
   currentPage: string;
   saving: boolean;
@@ -70,7 +49,7 @@ export interface AdminUIState {
 
 // Interface para las acciones del hook
 export interface AdminUIActions {
-  setActiveTab: (tab: Tab) => void;
+  setActiveTab: (tab: AdminTab) => void;
   setDevice: (device: Device) => void;
   setCurrentPage: (page: string) => void;
   setSaving: (saving: boolean) => void;
@@ -84,14 +63,14 @@ export interface AdminUIActions {
   setPageLayout: React.Dispatch<React.SetStateAction<PageSection[]>>;
   setSelectedSection: (sectionId: string | null) => void;
   toggleSectionVisibility: (sectionId: string) => void;
-  navigateToInput: (tab: Tab, page?: string, inputName?: string) => void;
+  navigateToInput: (tab: AdminTab, page?: string, inputName?: string) => void;
 }
 
 export type UseAdminUIReturn = AdminUIState & AdminUIActions;
 
 export function useAdminUI(): UseAdminUIReturn {
   // Estado de navegacion
-  const [activeTab, setActiveTab] = useState<Tab>('inicio');
+  const [activeTab, setActiveTab] = useState<AdminTab>('inicio');
   const [device, setDevice] = useState<Device>('desktop');
   const [currentPage, setCurrentPage] = useState('/');
 
@@ -143,7 +122,7 @@ export function useAdminUI(): UseAdminUIReturn {
   }, []);
 
   // Navegar a un input especifico
-  const navigateToInput = useCallback((tab: Tab, page?: string, inputName?: string) => {
+  const navigateToInput = useCallback((tab: AdminTab, page?: string, inputName?: string) => {
     setActiveTab(tab);
 
     if (page) {

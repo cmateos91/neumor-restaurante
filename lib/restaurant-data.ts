@@ -2,7 +2,6 @@ import { supabase } from './supabase';
 import {
   Sitio,
   SitioConfig,
-  SitioTextos,
   SitioGaleria,
   SitioFeature,
   SitioReserva,
@@ -14,11 +13,13 @@ import {
   TextosGaleria,
   TextosReservas,
   TextosContacto,
+  TextosNav,
   defaultTextosInicio,
   defaultTextosMenu,
   defaultTextosGaleria,
   defaultTextosReservas,
   defaultTextosContacto,
+  defaultTextosNav,
   SitioReservaInsert,
   SitioConfigUpdate,
   SitioGaleriaInsert,
@@ -87,6 +88,7 @@ export async function getSitioTextos(sitioId: string): Promise<{
   galeria: TextosGaleria;
   reservas: TextosReservas;
   contacto: TextosContacto;
+  nav: TextosNav;
 }> {
   try {
     const { data } = await supabase
@@ -104,7 +106,8 @@ export async function getSitioTextos(sitioId: string): Promise<{
       menu: { ...defaultTextosMenu, ...textosMap['menu'] } as TextosMenu,
       galeria: { ...defaultTextosGaleria, ...textosMap['galeria'] } as TextosGaleria,
       reservas: { ...defaultTextosReservas, ...textosMap['reservas'] } as TextosReservas,
-      contacto: { ...defaultTextosContacto, ...textosMap['contacto'] } as TextosContacto
+      contacto: { ...defaultTextosContacto, ...textosMap['contacto'] } as TextosContacto,
+      nav: { ...defaultTextosNav, ...textosMap['nav'] } as TextosNav
     };
   } catch {
     return {
@@ -112,7 +115,8 @@ export async function getSitioTextos(sitioId: string): Promise<{
       menu: defaultTextosMenu,
       galeria: defaultTextosGaleria,
       reservas: defaultTextosReservas,
-      contacto: defaultTextosContacto
+      contacto: defaultTextosContacto,
+      nav: defaultTextosNav
     };
   }
 }

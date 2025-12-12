@@ -3,7 +3,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { PageSection } from '@/lib/page-builder.types';
 import { FormRestaurante } from './useSitioData';
+import { type AdminTab } from '@/lib/contracts';
 import { RestauranteMenuCategoria, RestauranteMenuItem, SitioGaleria, SitioFeature } from '@/lib/database.types';
+import { editableNavigationMap } from '@/lib/editable-map';
 
 // Tipos de mensajes que enviamos al iframe
 export type IframeMessageType =
@@ -15,51 +17,17 @@ export type IframeMessageType =
   | 'select';
 
 // Mapeo de elementId a navegacion en el admin
-export type Tab = 'inicio' | 'menu' | 'galeria' | 'reservas' | 'contacto';
+export type Tab = AdminTab;
 
 export interface ElementNavigation {
-  tab: Tab;
+  tab: AdminTab;
   page?: string;
   inputName?: string;
 }
 
-// Mapeo completo de elementos editables
-export const elementToNavigation: Record<string, ElementNavigation> = {
-  // INICIO - Hero
-  'inicio.hero.nombre': { tab: 'inicio', page: 'inicio', inputName: 'nombre' },
-  'inicio.hero.tagline': { tab: 'inicio', page: 'inicio', inputName: 'tagline' },
-  'inicio.hero.btn_menu': { tab: 'inicio', page: 'inicio', inputName: 'inicio_btn_menu' },
-  'inicio.hero.btn_reservas': { tab: 'inicio', page: 'inicio', inputName: 'inicio_btn_reservas' },
-  // INICIO - Features
-  'inicio.features.titulo': { tab: 'inicio', page: 'inicio', inputName: 'inicio_features_titulo' },
-  'inicio.features.subtitulo': { tab: 'inicio', page: 'inicio', inputName: 'inicio_features_subtitulo' },
-  'inicio.features.items': { tab: 'inicio' },
-  // INICIO - Galeria
-  'inicio.galeria.titulo': { tab: 'inicio', page: 'inicio', inputName: 'inicio_galeria_titulo' },
-  'inicio.galeria.subtitulo': { tab: 'inicio', page: 'inicio', inputName: 'inicio_galeria_subtitulo' },
-  'inicio.galeria.btn': { tab: 'inicio', page: 'inicio', inputName: 'inicio_galeria_btn' },
-  'inicio.galeria.items': { tab: 'galeria' },
-  // MENU
-  'menu.titulo': { tab: 'menu', page: 'menu', inputName: 'menu_titulo' },
-  'menu.subtitulo': { tab: 'menu', page: 'menu', inputName: 'menu_subtitulo' },
-  'menu.sin_items': { tab: 'menu', page: 'menu', inputName: 'menu_sin_items' },
-  'menu.items': { tab: 'menu' },
-  // GALERIA
-  'galeria.titulo': { tab: 'galeria', page: 'galeria', inputName: 'galeria_titulo' },
-  'galeria.subtitulo': { tab: 'galeria', page: 'galeria', inputName: 'galeria_subtitulo' },
-  // RESERVAS
-  'reservas.titulo': { tab: 'reservas', page: 'reservas', inputName: 'reservas_titulo' },
-  'reservas.subtitulo': { tab: 'reservas', page: 'reservas', inputName: 'reservas_subtitulo' },
-  'reservas.btn': { tab: 'reservas', page: 'reservas', inputName: 'reservas_btn_confirmar' },
-  'reservas.btn_enviando': { tab: 'reservas', page: 'reservas', inputName: 'reservas_btn_enviando' },
-  'reservas.exito_titulo': { tab: 'reservas', page: 'reservas', inputName: 'reservas_exito_titulo' },
-  'reservas.exito_mensaje': { tab: 'reservas', page: 'reservas', inputName: 'reservas_exito_mensaje' },
-  // CONTACTO
-  'contacto.titulo': { tab: 'contacto', page: 'contacto', inputName: 'contacto_titulo' },
-  'contacto.subtitulo': { tab: 'contacto', page: 'contacto', inputName: 'contacto_subtitulo' },
-  'contacto.info.titulo': { tab: 'contacto', page: 'contacto', inputName: 'contacto_info_titulo' },
-  'contacto.info.descripcion': { tab: 'contacto', page: 'contacto', inputName: 'contacto_info_descripcion' }
-};
+// Mapeo completo de elementos editables (centralizado en lib/editable-map.ts)
+export const elementToNavigation: Record<string, ElementNavigation> =
+  editableNavigationMap as Record<string, ElementNavigation>;
 
 // Interface para los callbacks de eventos del iframe
 export interface IframeEventHandlers {

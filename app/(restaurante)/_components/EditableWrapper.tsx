@@ -7,13 +7,15 @@ interface EditableWrapperProps {
   elementId: string; // ID unico del elemento (ej: "inicio.hero.nombre")
   className?: string;
   as?: React.ElementType;
+  style?: React.CSSProperties;
 }
 
 export default function EditableWrapper({
   children,
   elementId,
   className = '',
-  as: Component = 'div'
+  as: Component = 'div',
+  style
 }: EditableWrapperProps) {
   // Determinar si estamos en iframe solo una vez
   const [inIframe] = useState(() => typeof window !== 'undefined' && window !== window.parent);
@@ -74,7 +76,7 @@ export default function EditableWrapper({
   // Si no estamos en modo edicion, renderizar normal con el elemento y clases originales
   if (!isEditMode) {
     return (
-      <Component className={className}>
+      <Component className={className} style={style}>
         {children}
       </Component>
     );
@@ -83,6 +85,7 @@ export default function EditableWrapper({
   return (
     <Component
       className={`editable-element ${className} ${isSelected ? 'editable-selected' : ''} ${isHovered ? 'editable-hover' : ''}`}
+      style={style}
       onClickCapture={handleClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}

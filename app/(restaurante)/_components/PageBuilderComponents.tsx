@@ -64,7 +64,7 @@ export function HeadingComponent({ component, isEditMode }: ComponentRendererPro
   // Obtener el texto desde el config según la key
   const text = textKey === 'nombre' ? config?.nombre || 'Mi Restaurante' : config?.tagline || '';
 
-  const HeadingTag = `h${level}` as keyof JSX.IntrinsicElements;
+  const HeadingTag = `h${level}` as 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
 
   const baseClasses = {
     1: 'text-5xl md:text-7xl font-bold text-[#2c2c2c] mb-6 tracking-tight',
